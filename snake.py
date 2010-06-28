@@ -72,8 +72,9 @@ class Field(object):
         if type(self[pos]) is not Rabbit:
             raise ValueError, 'Element at %s is not eatable: %s.' % (
                     pos, self.get(pos))
-        self.remove(pos)
         self.spawn_rabbit()
+        self.remove(pos)
+
 
     def spawn_rabbit(self):
         good_pos = False
