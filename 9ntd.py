@@ -8,25 +8,13 @@ from math import sqrt
 import pygame
 from pygame.locals import *
 
-GAME_X_SIZE = 5
-GAME_Y_SIZE = 10
-GAME_CELL_SIZE = 40
-
-TICK_PER_SEC = 100
-
-def game2screen(game_pos):
-    g_x, g_y = game_pos
-    s_x, s_y = g_x * GAME_CELL_SIZE, g_y * GAME_CELL_SIZE
-    return s_x, s_y
+import util
+from creep import Creep
+from cfg import *
 
 def game2cscreen(game_pos):
-    screen = game2screen(game_pos)
+    screen = util.game2screen(game_pos)
     return screen[0] + GAME_CELL_SIZE / 2, screen[1] + GAME_CELL_SIZE / 2
-
-def screen2game(screen_pos):
-    s_x, s_y = screen_pos
-    g_x, g_y = s_x / GAME_CELL_SIZE, s_y / GAME_CELL_SIZE
-    return g_x, g_y
 
 def norm(vec):
     return sqrt(vec[0] ** 2 + vec[1] ** 2)
@@ -74,6 +62,10 @@ class Cell(object):
         self.distance_to_exit = None
         self.next_pos_to_exit = None
 
+class World(object):
+    def __init__(self):
+        self.field = Field(GAME_X_SIZE, GAME_Y_SIZE)
+        self.field.set_exit([(0,0)])
 
 class Field(object):
     def __init__(self, size_x, size_y):
@@ -181,8 +173,7 @@ class Game(object):
         self._continue_main_loop = True
         self._clock = pygame.time.Clock()
         self._state = 'PLAY'
-        self._field = Field(GAME_X_SIZE, GAME_Y_SIZE)
-        self._field.set_exit([(0,0)])
+        self.world = World()
 
     def _main_loop(self):
         while self._continue_main_loop:
@@ -196,9 +187,9 @@ class Game(object):
                 event.type == KEYDOWN and event.key == K_ESCAPE):
             self._exit()
         elif event.type == MOUSEBUTTONDOWN:
-            game_pos = screen2game(event.pos)
-            if self._field.empty(game_pos) and game_pos != (0,0):
-                self._field.put(game_pos, Wall())
+            game_pos = util.screen2game(event.pos)
+            if self.world.field.empty(game_pos) and game_pos != (0,0):
+                self.world.field.put(game_pos, Wall())
                 self._redraw_all()
 
     def _exit(self):
@@ -220,26 +211,26 @@ class Game(object):
         return background
 
     def _redraw_field(self):
-        self._redraw_cells(self._field.extract_changed())
+        self._redraw_cells(self.world.field.extract_changed())
 
     def _redraw_all(self):
         self._draw_background()
         if self._state == 'PLAY':
-            self._redraw_cells(self._field.iter_pos())
+            self._redraw_cells(self.world.field.iter_pos())
             self._redraw_arrows()
         pygame.display.flip()
 
     def _redraw_cells(self, pos):
         for p in pos:
-            rect = pygame.Rect(game2screen(p), (GAME_CELL_SIZE, GAME_CELL_SIZE))
-            item = self._field.get_content(p)
+            rect = pygame.Rect(util.game2screen(p), (GAME_CELL_SIZE, GAME_CELL_SIZE))
+            item = self.world.field.get_content(p)
             color = item.color()
             pygame.draw.rect(self._screen, color, rect)
 
     def _redraw_arrows(self):
         color = (255, 0, 0)
-        for pos in self._field.iter_pos():
-            n_pos = self._field.get_next_pos(pos)
+        for pos in self.world.field.iter_pos():
+            n_pos = self.world.field.get_next_pos(pos)
             if n_pos is not None:
                 center = game2cscreen(pos)
                 n_center = game2cscreen(n_pos)
