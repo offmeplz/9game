@@ -66,6 +66,18 @@ class World(object):
     def __init__(self):
         self.field = Field(GAME_X_SIZE, GAME_Y_SIZE)
         self.field.set_exit([(0,0)])
+        self.creeps = pygame.sprite.Group()
+        self.add_creep(game2cscreen((GAME_X_SIZE - 1, GAME_Y_SIZE - 1)), Creep)
+
+    def add_creep(self, pos, cls):
+        creep = cls(pos, self.field)
+        creep.add([self.creeps])
+
+    def update(self, ticks):
+        self.creeps.update(ticks)
+
+    def draw(self, surface):
+        self.creeps.draw(surface)
 
 class Field(object):
     def __init__(self, size_x, size_y):
@@ -181,6 +193,10 @@ class Game(object):
             events = pygame.event.get()
             for e in events:
                 self._dispatch_event(e)
+            self.world.creeps.clear(self._screen, self.back)
+            self.world.update(1)
+            self.world.draw(self._screen)
+            pygame.display.flip()
 
     def _dispatch_event(self, event):
         if (event.type == QUIT) or (
@@ -206,6 +222,7 @@ class Game(object):
         background = pygame.Surface(self._screen.get_size())
         background = background.convert()
         background.fill(color)
+        self.back = background
         self._screen.blit(background, (0, 0))
         pygame.display.flip()
         return background
