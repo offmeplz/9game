@@ -188,6 +188,8 @@ class Game(object):
         self.world = World()
         self.back = pygame.Surface(self._screen.get_size())
         self.back = self.back.convert()
+        color = (255,255,255)
+        self.back.fill(color)
 
     def _main_loop(self):
         while self._continue_main_loop:
@@ -224,8 +226,6 @@ class Game(object):
         pygame.display.quit()
 
     def _update_background(self):
-        color = (255,255,255)
-        self.back.fill(color)
         self._redraw_field(self.back)
         self._redraw_arrows(self.back)
 
