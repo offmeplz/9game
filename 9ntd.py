@@ -186,6 +186,8 @@ class Game(object):
         self._clock = pygame.time.Clock()
         self._state = 'PLAY'
         self.world = World()
+        self.back = pygame.Surface(self._screen.get_size())
+        self.back = self.back.convert()
 
     def _main_loop(self):
         while self._continue_main_loop:
@@ -206,52 +208,45 @@ class Game(object):
             game_pos = util.screen2game(event.pos)
             if self.world.field.empty(game_pos) and game_pos != (0,0):
                 self.world.field.put(game_pos, Wall())
-                self._redraw_all()
+                self._update_background()
+                self._screen.blit(self.back, (0,0))
+                pygame.display.flip()
 
     def _exit(self):
         self._state = 'EXIT'
         self._continue_main_loop = False
 
     def run(self):
-        self._redraw_all()
+        self._update_background()
+        self._screen.blit(self.back, (0,0))
+        pygame.display.flip()
         self._main_loop()
         pygame.display.quit()
 
-    def _draw_background(self):
+    def _update_background(self):
         color = (255,255,255)
-        background = pygame.Surface(self._screen.get_size())
-        background = background.convert()
-        background.fill(color)
-        self.back = background
-        self._screen.blit(background, (0, 0))
-        pygame.display.flip()
-        return background
+        self.back.fill(color)
+        self._redraw_field(self.back)
+        self._redraw_arrows(self.back)
 
-    def _redraw_field(self):
-        self._redraw_cells(self.world.field.extract_changed())
+    def _redraw_field(self, surf):
+        self._redraw_cells(self.world.field.extract_changed(), surf)
 
-    def _redraw_all(self):
-        self._draw_background()
-        if self._state == 'PLAY':
-            self._redraw_cells(self.world.field.iter_pos())
-            self._redraw_arrows()
-        pygame.display.flip()
-
-    def _redraw_cells(self, pos):
+    def _redraw_cells(self, pos, surf):
         for p in pos:
             rect = pygame.Rect(util.game2screen(p), (GAME_CELL_SIZE, GAME_CELL_SIZE))
             item = self.world.field.get_content(p)
             color = item.color()
-            pygame.draw.rect(self._screen, color, rect)
+            pygame.draw.rect(surf, color, rect)
 
-    def _redraw_arrows(self):
+    def _redraw_arrows(self, surf):
         color = (255, 0, 0)
         for pos in self.world.field.iter_pos():
             n_pos = self.world.field.get_next_pos(pos)
             if n_pos is not None:
                 center = game2cscreen(pos)
                 n_center = game2cscreen(n_pos)
-                draw_arrow(self._screen, color, center, n_center)
+                draw_arrow(surf, color, center, n_center)
 
 if __name__ == '__main__':
     g = Game()
