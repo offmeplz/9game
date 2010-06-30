@@ -12,10 +12,6 @@ import util
 from creep import Creep
 from cfg import *
 
-def game2cscreen(game_pos):
-    screen = util.game2screen(game_pos)
-    return screen[0] + GAME_CELL_SIZE / 2, screen[1] + GAME_CELL_SIZE / 2
-
 def norm(vec):
     return sqrt(vec[0] ** 2 + vec[1] ** 2)
 
@@ -67,7 +63,7 @@ class World(object):
         self.field = Field(GAME_X_SIZE, GAME_Y_SIZE)
         self.field.set_exit([(0,0)])
         self.creeps = pygame.sprite.Group()
-        self.add_creep(game2cscreen((GAME_X_SIZE - 1, GAME_Y_SIZE - 1)), Creep)
+        self.add_creep((GAME_X_SIZE - 1, GAME_Y_SIZE - 1), Creep)
 
     def add_creep(self, pos, cls):
         creep = cls(pos, self.field)
@@ -244,8 +240,8 @@ class Game(object):
         for pos in self.world.field.iter_pos():
             n_pos = self.world.field.get_next_pos(pos)
             if n_pos is not None:
-                center = game2cscreen(pos)
-                n_center = game2cscreen(n_pos)
+                center = util.game2cscreen(pos)
+                n_center = util.game2cscreen(n_pos)
                 draw_arrow(surf, color, center, n_center)
 
 if __name__ == '__main__':
