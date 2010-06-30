@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 #vim:fileencoding=utf-8
 
-import pygame
+import math
 import os
+import pygame
 
 from cfg import *
 
@@ -106,3 +107,6 @@ class Vec(object):
 
     def __str__(self):
         return "Vec(%s,%s)" % (str(self.x), str(self.y))
+
+    def __abs__(self):
+        return math.sqrt(self.x ** 2 + self.y ** 2)
