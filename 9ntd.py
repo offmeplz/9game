@@ -73,6 +73,8 @@ class World(object):
             return False
         self.field.put(pos, tower)
         tower.add([self.towers])
+        for creep in self.creeps:
+            creep.forget_way()
 
     def update(self, ticks):
         self.time += ticks

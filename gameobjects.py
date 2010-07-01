@@ -52,14 +52,16 @@ class Creep(GameObject):
             self.curdst = Vec(dst)
             self.cursrc = Vec(g_pos)
         dstvec = self.curdst - self.g_pos
-        g_dpos = self.curdst - self.cursrc
-        g_dpos /= abs(g_dpos)
-        g_dpos *= ticks * self.speed / float(TICK_PER_SEC)
-        if abs(g_dpos) >= abs(dstvec):
-            g_dpos = dstvec
+        vecnorm = self.speed / float(TICK_PER_SEC)
+        if abs(dstvec) <= vecnorm:
             self.curdst = None
-        self.g_pos += g_dpos
+        else:
+            dstvec *= vecnorm / abs(dstvec)
+        self.g_pos += dstvec
         self.rect.center = util.game2cscreen(self.g_pos)
+
+    def forget_way(self):
+        self.curdst, self.cursrc = None, None
 
     def finish(self):
         self.kill()
