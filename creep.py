@@ -11,7 +11,7 @@ from cfg import *
 class Creep(pygame.sprite.Sprite):
     img, img_rect = None, None
     resource_name = 'creep.png'
-    speed = 0.5
+    speed = 1.
     
     def __init__(self, g_pos, field):
         pygame.sprite.Sprite.__init__(self)
@@ -26,7 +26,7 @@ class Creep(pygame.sprite.Sprite):
     def get_img_rect(cls):
         if cls.img is None:
             cls.img, cls.img_rect = util.load_image(cls.resource_name)
-        return cls.img, cls.img_rect
+        return cls.img, cls.img_rect.copy()
 
     def update(self, ticks):
         g_pos = Vec(int(self.g_pos[0]), int(self.g_pos[1]))
@@ -49,4 +49,4 @@ class Creep(pygame.sprite.Sprite):
         self.rect.center = util.game2cscreen(self.g_pos)
 
     def finish(self):
-        pass
+        self.kill()
