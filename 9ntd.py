@@ -61,19 +61,28 @@ class Cell(object):
 class World(object):
     def __init__(self):
         self.field = Field(GAME_X_SIZE, GAME_Y_SIZE)
-        self.field.set_exit([(0,0)])
+        self.field.set_exit([(GAME_X_SIZE / 2,0)])
         self.creeps = pygame.sprite.Group()
-        self.add_creep((GAME_X_SIZE - 1, GAME_Y_SIZE - 1), Creep)
+        self.next_spawn = 0
+        self.time = 0
+        self.spawn_period = 2 * TICK_PER_SEC
 
     def add_creep(self, pos, cls):
         creep = cls(pos, self.field)
         creep.add([self.creeps])
 
     def update(self, ticks):
+        self.time += ticks
+        if self.time > self.next_spawn:
+            self.spawn_creep()
+            self.next_spawn += self.spawn_period
         self.creeps.update(ticks)
 
     def draw(self, surface):
         self.creeps.draw(surface)
+
+    def spawn_creep(self):
+        self.add_creep((GAME_X_SIZE / 2, GAME_Y_SIZE - 1), Creep)
 
 class Field(object):
     def __init__(self, size_x, size_y):
