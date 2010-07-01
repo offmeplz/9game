@@ -9,7 +9,7 @@ import pygame
 from pygame.locals import *
 
 import util
-from creep import Creep
+from gameobjects import Creep, Wall
 from cfg import *
 
 def norm(vec):
@@ -46,11 +46,6 @@ class NothingType(object):
 
 Nothing = NothingType()
 
-class Wall(object):
-    def color(self):
-        return (0,0,0)
-    
-
 class Cell(object):
     def __init__(self, content=Nothing, is_exit=False):
         self.content = content
@@ -63,6 +58,7 @@ class World(object):
         self.field = Field(GAME_X_SIZE, GAME_Y_SIZE)
         self.field.set_exit([(GAME_X_SIZE / 2,0)])
         self.creeps = pygame.sprite.Group()
+        self.towers = pygame.sprite.Group()
         self.next_spawn = 0
         self.time = 0
         self.spawn_period = 2 * TICK_PER_SEC
@@ -70,6 +66,11 @@ class World(object):
     def add_creep(self, pos, cls):
         creep = cls(pos, self.field)
         creep.add([self.creeps])
+
+    def add_tower(self, pos, cls):
+        tower = cls(pos)
+        self.field.put(pos, tower)
+        tower.add([self.towers])
 
     def update(self, ticks):
         self.time += ticks
@@ -214,9 +215,8 @@ class Game(object):
         elif event.type == MOUSEBUTTONDOWN:
             game_pos = util.screen2game(event.pos)
             if self.world.field.empty(game_pos) and game_pos != (0,0):
-                self.world.field.put(game_pos, Wall())
+                self.world.add_tower(game_pos, Wall)
                 self._update_background()
-                self._screen.blit(self.back, (0,0))
                 pygame.display.flip()
 
     def _exit(self):
@@ -238,6 +238,10 @@ class Game(object):
         self._redraw_cells(self.world.field.extract_changed(), surf)
 
     def _redraw_cells(self, pos, surf):
+        self.world.towers.clear(self._screen, self.back)
+        self.world.towers.draw(self._screen)
+
+        return
         for p in pos:
             rect = pygame.Rect(util.game2screen(p), (GAME_CELL_SIZE, GAME_CELL_SIZE))
             item = self.world.field.get_content(p)

@@ -8,16 +8,29 @@ from util import Vec
 
 from cfg import *
 
-class Creep(pygame.sprite.Sprite):
+class GameObject(pygame.sprite.Sprite):
     img, img_rect = None, None
+
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self)
+        self.image, self.rect = self.get_img_rect()
+
+    @classmethod
+    def get_img_rect(cls):
+        if cls.img is None:
+            cls.img, cls.img_rect = util.load_image(cls.resource_name)
+        return cls.img, cls.img_rect.copy()
+
+
+class Creep(GameObject):
     resource_name = 'creep.png'
     speed = 1.
     
     def __init__(self, g_pos, field):
-        pygame.sprite.Sprite.__init__(self)
+        GameObject.__init__(self)
+
         self.g_pos = Vec(float(g_pos[0]), float(g_pos[1]))
         self.field = field
-        self.image, self.rect = self.get_img_rect()
         self.rect.center = util.game2cscreen(g_pos)
         self.curdst = None
         self.cursrc = None
@@ -50,3 +63,9 @@ class Creep(pygame.sprite.Sprite):
 
     def finish(self):
         self.kill()
+
+class Wall(GameObject):
+    resource_name = 'wall.png'
+    def __init__(self, g_pos):
+        GameObject.__init__(self)
+        self.rect.center = util.game2cscreen(g_pos)
