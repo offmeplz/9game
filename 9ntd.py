@@ -69,6 +69,8 @@ class World(object):
 
     def add_tower(self, pos, cls):
         tower = cls(pos)
+        if pygame.sprite.spritecollideany(tower, self.creeps):
+            return False
         self.field.put(pos, tower)
         tower.add([self.towers])
 
