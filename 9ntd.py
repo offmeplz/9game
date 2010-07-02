@@ -9,12 +9,8 @@ import pygame
 from pygame.locals import *
 
 import util
-from creep import Creep
+from gameobjects import Creep, Wall
 from cfg import *
-
-def game2cscreen(game_pos):
-    screen = util.game2screen(game_pos)
-    return screen[0] + GAME_CELL_SIZE / 2, screen[1] + GAME_CELL_SIZE / 2
 
 def norm(vec):
     return sqrt(vec[0] ** 2 + vec[1] ** 2)
@@ -50,11 +46,6 @@ class NothingType(object):
 
 Nothing = NothingType()
 
-class Wall(object):
-    def color(self):
-        return (0,0,0)
-    
-
 class Cell(object):
     def __init__(self, content=Nothing, is_exit=False):
         self.content = content
@@ -65,19 +56,38 @@ class Cell(object):
 class World(object):
     def __init__(self):
         self.field = Field(GAME_X_SIZE, GAME_Y_SIZE)
-        self.field.set_exit([(0,0)])
+        self.field.set_exit([(GAME_X_SIZE / 2,0)])
         self.creeps = pygame.sprite.Group()
-        self.add_creep(game2cscreen((GAME_X_SIZE - 1, GAME_Y_SIZE - 1)), Creep)
+        self.towers = pygame.sprite.Group()
+        self.next_spawn = 0
+        self.time = 0
+        self.spawn_period = 2 * TICK_PER_SEC
 
     def add_creep(self, pos, cls):
         creep = cls(pos, self.field)
         creep.add([self.creeps])
 
+    def add_tower(self, pos, cls):
+        tower = cls(pos)
+        if pygame.sprite.spritecollideany(tower, self.creeps):
+            return False
+        self.field.put(pos, tower)
+        tower.add([self.towers])
+        for creep in self.creeps:
+            creep.forget_way()
+
     def update(self, ticks):
+        self.time += ticks
+        if self.time > self.next_spawn:
+            self.spawn_creep()
+            self.next_spawn += self.spawn_period
         self.creeps.update(ticks)
 
     def draw(self, surface):
         self.creeps.draw(surface)
+
+    def spawn_creep(self):
+        self.add_creep((GAME_X_SIZE / 2, GAME_Y_SIZE - 1), Creep)
 
 class Field(object):
     def __init__(self, size_x, size_y):
@@ -209,9 +219,8 @@ class Game(object):
         elif event.type == MOUSEBUTTONDOWN:
             game_pos = util.screen2game(event.pos)
             if self.world.field.empty(game_pos) and game_pos != (0,0):
-                self.world.field.put(game_pos, Wall())
+                self.world.add_tower(game_pos, Wall)
                 self._update_background()
-                self._screen.blit(self.back, (0,0))
                 pygame.display.flip()
 
     def _exit(self):
@@ -233,6 +242,10 @@ class Game(object):
         self._redraw_cells(self.world.field.extract_changed(), surf)
 
     def _redraw_cells(self, pos, surf):
+        self.world.towers.clear(self._screen, self.back)
+        self.world.towers.draw(self._screen)
+
+        return
         for p in pos:
             rect = pygame.Rect(util.game2screen(p), (GAME_CELL_SIZE, GAME_CELL_SIZE))
             item = self.world.field.get_content(p)
@@ -244,8 +257,8 @@ class Game(object):
         for pos in self.world.field.iter_pos():
             n_pos = self.world.field.get_next_pos(pos)
             if n_pos is not None:
-                center = game2cscreen(pos)
-                n_center = game2cscreen(n_pos)
+                center = util.game2cscreen(pos)
+                n_center = util.game2cscreen(n_pos)
                 draw_arrow(surf, color, center, n_center)
 
 if __name__ == '__main__':
