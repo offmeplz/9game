@@ -23,7 +23,7 @@ def build_right_angle_dir_field(graph, exits):
     while queue:
         curpoint = queue.popleft()
         curdistance = field[curpoint].distance
-        for edge in graph.in_edges(pos):
+        for edge in graph.in_edges(curpoint):
             if edge.score != 1:
                 raise ValueError, "Not all of edges has score=1"
             npoint = edge.begin
