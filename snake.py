@@ -200,12 +200,8 @@ class Game(object):
         else:
             raise Exception, 'Unexpected state: %s' % str(self._state)
 
-        background = pygame.Surface(self._screen.get_size())
-        background = background.convert()
-        background.fill(color)
-        self._screen.blit(background, (0, 0))
+        self._screen.fill(color)
         pygame.display.flip()
-        return background
 
     def _main_loop(self):
         while self._continue_main_loop:
