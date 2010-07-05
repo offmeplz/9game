@@ -9,6 +9,7 @@ import pygame
 from pygame.locals import *
 
 import util
+import field
 from gameobjects import Creep, Wall
 from cfg import *
 
@@ -155,31 +156,19 @@ class Field(object):
                 if self.contains(pos) and self.empty(pos)]
 
     def _recalculate_paths(self):
-        for pos in self.iter_pos():
-            cell = self._get_cell(pos)
-            cell.distance_to_exit = None
-            cell.next_pos_to_exit = None
-
-        queue = deque(self._exit_pos)
-        for pos in queue:
-            cell = self._get_cell(pos)
-            cell.distance_to_exit = 0
-        while len(queue) > 0:
-            pos = queue.popleft()
-            cell = self._get_cell(pos)
-            cur_distance = cell.distance_to_exit
-            for n_pos in self.get_neighbours(pos):
-                n_cell = self._get_cell(n_pos)
-                if n_cell.distance_to_exit is None and n_cell.content is Nothing:
-                    n_cell.distance_to_exit = cur_distance
-                    n_cell.next_pos_to_exit = pos
-                    queue.append(n_pos)
-                else:
-                    assert n_cell.distance_to_exit <= cur_distance
+        self.dir_field = field.build_right_angle_dir_field(self, self._exit_pos)
 
     def get_next_pos(self, pos):
-        return self._get_cell(pos).next_pos_to_exit
+        pos = tuple(pos)
+        direction = self.dir_field.get(pos, None)
+        if direction is None:
+            return None
+        else:
+            return direction.next_vertex
 
+    def in_edges(self, endpos):
+        return [field.Edge(begpos, endpos, 1)
+                for begpos in self.get_neighbours(endpos)]
 
 class Game(object):
     def __init__(self):
