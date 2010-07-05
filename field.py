@@ -4,9 +4,9 @@
 from collections import deque
 
 class Direction(object):
-    def __init__(self, distance, nelement):
+    def __init__(self, distance, next_vertex):
         self.distance = distance
-        self.nelement = nelement
+        self.next_vertex = next_vertex
 
 class Edge(object):
     def __init__(self, begin, end, score):
@@ -31,5 +31,5 @@ def build_right_angle_dir_field(graph, exits):
                 field[npoint] = Direction(curdistance + 1, curpoint)
                 queue.append(npoint)
             else:
-                assert field[npoint].distance <= curdistance
+                assert field[npoint].distance <= curdistance + 1
     return field
