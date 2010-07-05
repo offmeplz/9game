@@ -90,6 +90,7 @@ class World(object):
     def spawn_creep(self):
         self.add_creep((GAME_X_SIZE / 2, GAME_Y_SIZE - 1), Creep)
 
+
 class Field(object):
     def __init__(self, size_x, size_y):
         self._x_size = size_x
@@ -233,13 +234,6 @@ class Game(object):
     def _redraw_cells(self, pos, surf):
         self.world.towers.clear(self._screen, self.back)
         self.world.towers.draw(self._screen)
-
-        return
-        for p in pos:
-            rect = pygame.Rect(util.game2screen(p), (GAME_CELL_SIZE, GAME_CELL_SIZE))
-            item = self.world.field.get_content(p)
-            color = item.color()
-            pygame.draw.rect(surf, color, rect)
 
     def _redraw_arrows(self, surf):
         color = (255, 0, 0)
