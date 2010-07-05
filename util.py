@@ -34,12 +34,20 @@ def game2cscreen(game_pos):
 
 def addvec(pos1, pos2):
     return pos1[0] + pos2[0], pos1[1] + pos2[1]
-
+ 
 def mulvec(pos, x):
     return pos[0] * x, pos[1] * x
 
 def divvec(pos, x):
     return pos[0] / x, pos[1] / x
+
+def signum(num):
+    if num > 0:
+        return 1
+    elif num < 0:
+        return -1
+    else:
+        return 0
 
 class Vec(object):
     def __init__(self, x, y=None):
