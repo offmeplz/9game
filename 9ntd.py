@@ -73,6 +73,14 @@ class World(object):
         if pygame.sprite.spritecollideany(tower, self.creeps):
             return False
         self.field.put(pos, tower)
+        block_creeps = False
+        for creep in self.creeps:
+            if tuple(creep.current_cell()) not in self.field.dir_field:
+                block_creeps = True
+                break
+        if block_creeps:
+            self.field.clear(pos)
+            return
         tower.add([self.towers])
         for creep in self.creeps:
             creep.forget_way()
@@ -127,6 +135,14 @@ class Field(object):
     def contains(self, pos):
         return 0 <= pos[0] < self._x_size and 0 <= pos[1] < self._y_size
 
+    def clear(self, pos):
+        if self.empty(pos):
+            raise ValueError, 'Cell %s is already emply' % pos
+        self._set_content(pos, Nothing)
+        self._changed.add(pos)
+        self._empty_fields += 1
+        self._recalculate_paths()
+
     def empty(self, pos):
         return self.get_content(pos) is Nothing
 
@@ -158,6 +174,9 @@ class Field(object):
 
     def _recalculate_paths(self):
         self.dir_field = field.build_right_angle_dir_field(self, self._exit_pos)
+
+    def set_dir_field(self, dir_field):
+        self.dir_field = dir_field
 
     def get_next_pos(self, pos):
         pos = tuple(pos)
