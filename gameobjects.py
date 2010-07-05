@@ -42,7 +42,7 @@ class Creep(GameObject):
         return cls.img, cls.img_rect.copy()
 
     def update(self, ticks):
-        g_pos = Vec(int(self.g_pos[0]), int(self.g_pos[1]))
+        g_pos = self.current_cell()
         cur_cell = self.field._get_cell(g_pos)
         if self.curdst is None:
             if cur_cell.is_exit:
@@ -65,6 +65,9 @@ class Creep(GameObject):
 
     def finish(self):
         self.kill()
+
+    def current_cell(self):
+        return int(round(self.g_pos[0])), int(round(self.g_pos[1]))
 
 class Wall(GameObject):
     resource_name = 'wall.png'
