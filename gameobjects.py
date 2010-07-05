@@ -4,7 +4,7 @@
 import pygame
 
 import util
-from util import Vec
+from util import Vec, signum
 
 from cfg import *
 
@@ -34,6 +34,7 @@ class Creep(GameObject):
         self.rect.center = util.game2cscreen(g_pos)
         self.curdst = None
         self.cursrc = None
+        self.direction = Vec(0,1)
 
     @classmethod
     def get_img_rect(cls):
@@ -58,6 +59,7 @@ class Creep(GameObject):
         else:
             dstvec *= vecnorm / abs(dstvec)
         self.g_pos += dstvec
+        self.change_direction(dstvec)
         self.rect.center = util.game2cscreen(self.g_pos)
 
     def forget_way(self):
@@ -68,6 +70,29 @@ class Creep(GameObject):
 
     def current_cell(self):
         return int(round(self.g_pos[0])), int(round(self.g_pos[1]))
+
+    def change_direction(self, new_direction):
+        direction = new_direction
+        if abs(direction[0]) < abs(direction[1]):
+            direction[0] = 0
+            direction[1] = signum(direction[1])
+        else:
+            direction[1] = 0
+            direction[0] = signum(direction[0])
+
+        if direction == self.direction:
+            return
+
+        self.direction = direction
+
+
+        degrees = {
+                (0,0) : 0,
+                (0,-1) : 0,
+                (-1,0) : 90,
+                (0, 1) : 180,
+                (1, 0) : 270}[tuple(self.direction)]
+        self.image = pygame.transform.rotate(self.img, degrees)
 
 class Wall(GameObject):
     resource_name = 'wall.png'
