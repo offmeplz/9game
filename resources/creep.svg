@@ -14,7 +14,10 @@
    id="svg2834"
    version="1.1"
    inkscape:version="0.47 r22583"
-   sodipodi:docname="creep.svg">
+   sodipodi:docname="creep.svg"
+   inkscape:export-filename="/home/ermolovd/workspace/9game/resources/creep.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
   <defs
      id="defs2836">
     <inkscape:perspective
@@ -41,7 +44,7 @@
      inkscape:pageshadow="2"
      inkscape:zoom="15.556349"
      inkscape:cx="27.236098"
-     inkscape:cy="0.91445803"
+     inkscape:cy="7.6381442"
      inkscape:current-layer="layer1"
      showgrid="true"
      inkscape:document-units="px"
@@ -71,7 +74,7 @@
      transform="translate(0,-48.000002)">
     <g
        id="g3675"
-       transform="matrix(0.25000021,0,0,0.24999989,-4.2603713e-4,47.999584)">
+       transform="matrix(-0.25000021,0,0,-0.24999989,15.999588,63.999578)">
       <path
          transform="matrix(1.0247453,0,0,1.0247453,-0.23289791,-0.23289547)"
          d="m 62.181818,31.454546 c 0,16.970204 -13.757068,30.727272 -30.727272,30.727272 -16.970204,0 -30.72727206,-13.757068 -30.72727206,-30.727272 0,-16.970204 13.75706806,-30.72727206 30.72727206,-30.72727206 16.970204,0 30.727272,13.75706806 30.727272,30.72727206 z"
@@ -83,8 +86,8 @@
          style="fill:#c87137;fill-opacity:1;stroke:#000000;stroke-opacity:1"
          sodipodi:type="arc" />
       <path
-         transform="matrix(1.0731708,0,0,1.0731707,-0.82926757,-2.8048785)"
-         d="m 18.90909,48.272728 c 0,0.753116 -0.61052,1.363636 -1.363636,1.363636 -0.753116,0 -1.363636,-0.61052 -1.363636,-1.363636 0,-0.753116 0.61052,-1.363636 1.363636,-1.363636 0.753116,0 1.363636,0.61052 1.363636,1.363636 z"
+         transform="matrix(1.0731708,0,0,1.0731707,-0.82926757,-9.8065553)"
+         d="m 18.90909,48.272728 a 1.3636364,1.3636364 0 1 1 -2.727272,0 1.3636364,1.3636364 0 1 1 2.727272,0 z"
          sodipodi:ry="1.3636364"
          sodipodi:rx="1.3636364"
          sodipodi:cy="48.272728"
@@ -93,7 +96,7 @@
          style="fill:#241f1c;fill-opacity:1;stroke:#000000;stroke-opacity:1"
          sodipodi:type="arc" />
       <path
-         d="m 18.90909,48.272728 c 0,0.753116 -0.61052,1.363636 -1.363636,1.363636 -0.753116,0 -1.363636,-0.61052 -1.363636,-1.363636 0,-0.753116 0.61052,-1.363636 1.363636,-1.363636 0.753116,0 1.363636,0.61052 1.363636,1.363636 z"
+         d="m 18.90909,48.272728 a 1.3636364,1.3636364 0 1 1 -2.727272,0 1.3636364,1.3636364 0 1 1 2.727272,0 z"
          sodipodi:ry="1.3636364"
          sodipodi:rx="1.3636364"
          sodipodi:cy="48.272728"
@@ -101,7 +104,7 @@
          id="path3618-6"
          style="fill:#241f1c;fill-opacity:1;stroke:#000000;stroke-opacity:1"
          sodipodi:type="arc"
-         transform="matrix(1.0731708,0,0,1.0731707,27.170731,-2.8048772)" />
+         transform="matrix(1.0731708,0,0,1.0731707,27.170731,-9.8065553)" />
       <path
          sodipodi:open="true"
          sodipodi:end="5.7595865"
