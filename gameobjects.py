@@ -59,7 +59,7 @@ class Creep(GameObject):
             self.curdst = Vec(dst)
             self.cursrc = Vec(g_pos)
         dstvec = self.curdst - self.g_pos
-        vecnorm = self.speed / float(TICK_PER_SEC)
+        vecnorm = ticks * self.speed / float(TICK_PER_SEC)
         if abs(dstvec) <= vecnorm:
             self.curdst = None
         else:
