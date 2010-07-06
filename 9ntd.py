@@ -221,10 +221,22 @@ class Game(object):
     def __init__(self):
         pygame.init()
         pygame.display.set_caption('9nMaze')
-        x_size = GAME_X_SIZE * GAME_CELL_SIZE
-        y_size = GAME_Y_SIZE * GAME_CELL_SIZE
-        window = pygame.display.set_mode((x_size, y_size))
+        field_x_size = GAME_X_SIZE * GAME_CELL_SIZE
+        field_y_size = GAME_Y_SIZE * GAME_CELL_SIZE
+
+        panel_x_size = PANEL_X_SIZE
+        panel_y_size = field_x_size
+
+        window_x_size = field_x_size + panel_x_size
+        window_y_size = field_y_size
+        
+        window = pygame.display.set_mode((window_x_size, window_y_size))
         self._screen = pygame.display.get_surface()
+        field_rect = Rect((0,0), (field_x_size, field_y_size))
+        self._field_surface = self._screen.subsurface(field_rect)
+
+        panel_rect = Rect((field_x_size, 0), (panel_x_size, panel_y_size))
+        self._panel_surface = self._screen.subsurface(panel_rect)
         self._restart()
 
     def _restart(self):
@@ -232,13 +244,15 @@ class Game(object):
         self._clock = pygame.time.Clock()
         self._state = 'PLAY'
         self.world = World()
-        self.background = pygame.Surface(self._screen.get_size()).convert()
+        self.background = pygame.Surface(self._field_surface.get_size()).convert()
         color = (255,255,255)
         self.background.fill(color)
 
         self.static = self.background.copy()
         self.ground = self.background.copy()
         self.air = self.background.copy()
+
+        self.update_panel()
 
     def _main_loop(self):
         while self._continue_main_loop:
@@ -247,29 +261,31 @@ class Game(object):
             for e in events:
                 self._dispatch_event(e)
 
-            self.world.creeps.clear(self._screen, self.static)
-            self.world.missles.clear(self._screen, self.static)
+            self.world.creeps.clear(self._field_surface, self.static)
+            self.world.missles.clear(self._field_surface, self.static)
 
             self.world.update(1)
-            self.world.draw(self._screen)
+            self.world.draw(self._field_surface)
             pygame.display.flip()
 
     def _dispatch_event(self, event):
         if (event.type == QUIT) or (
                 event.type == KEYDOWN and event.key == K_ESCAPE):
             self._exit()
-        elif event.type == MOUSEBUTTONDOWN and event.button == 1:
-            game_pos = util.screen2game(event.pos)
-            if self.world.field.empty(game_pos) and\
-                    tuple(game_pos) != self.world.field.enter:
-                self.world.add_tower(game_pos, SimpleTower)
-                self.update_static_layer()
-                pygame.display.flip()
-        elif event.type == MOUSEBUTTONDOWN and event.button == 2:
-            for creep in self.world.creeps:
-                b = SimpleBullet(util.screen2fgame(event.pos), creep, 1, 20)
-                b.add([self.world.missles])
-                break
+        elif event.type == MOUSEBUTTONDOWN:
+            if self._field_surface.get_rect().collidepoint(event.pos):
+                if event.button == 1:
+                    game_pos = util.screen2game(event.pos)
+                    if self.world.field.empty(game_pos) and\
+                            tuple(game_pos) != self.world.field.enter:
+                        self.world.add_tower(game_pos, SimpleTower)
+                        self.update_static_layer()
+                        pygame.display.flip()
+                elif event.button == 2:
+                    for creep in self.world.creeps:
+                        b = SimpleBullet(util.screen2fgame(event.pos), creep, 1, 20)
+                        b.add([self.world.missles])
+                        break
 
     def _exit(self):
         self._state = 'EXIT'
@@ -285,11 +301,11 @@ class Game(object):
         self.static.blit(self.background, (0,0))
         self._redraw_arrows(self.static)
         self.world.towers.draw(self.static)
-        self._screen.blit(self.static, (0,0))
+        self._field_surface.blit(self.static, (0,0))
 
     def _redraw_cells(self, pos, surf):
-        self.world.towers.clear(self._screen, self.background)
-        self.world.towers.draw(self._screen)
+        self.world.towers.clear(self._field_surface, self.background)
+        self.world.towers.draw(self._field_surface)
 
     def _redraw_arrows(self, surf):
         color = (255, 0, 0)
@@ -299,6 +315,9 @@ class Game(object):
                 center = util.game2cscreen(pos)
                 n_center = util.game2cscreen(n_pos)
                 draw_arrow(surf, color, center, n_center)
+
+    def update_panel(self):
+        self._panel_surface.fill((255, 255, 255))
 
 if __name__ == '__main__':
     g = Game()
