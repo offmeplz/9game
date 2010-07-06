@@ -112,7 +112,7 @@ class SimpleBullet(GameObject):
     def get_img_rect(cls):
         size = cls.radius * 2 - 1
         if cls.image is None:
-            cls.image = pygame.surface.Surface((size, size)).convert()
+            cls.image = pygame.surface.Surface((size, size)).convert_alpha()
             cls.image.fill(pygame.Color(255, 255, 255, 0))
             cls.rect = cls.image.get_rect()
             pygame.draw.circle(cls.image, (0,0,0), cls.rect.center, cls.radius)
