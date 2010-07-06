@@ -6,6 +6,7 @@ import pygame
 import util
 from util import Vec, signum
 
+
 from cfg import *
 
 class GameObject(pygame.sprite.Sprite):
@@ -20,6 +21,9 @@ class GameObject(pygame.sprite.Sprite):
         if cls.img is None:
             cls.img, cls.img_rect = util.load_image(cls.resource_name)
         return cls.img, cls.img_rect.copy()
+
+    def update(self, ticks):
+        pass
 
 
 class Creep(GameObject):
@@ -79,13 +83,9 @@ class Creep(GameObject):
         else:
             direction[1] = 0
             direction[0] = signum(direction[0])
-
         if direction == self.direction:
             return
-
         self.direction = direction
-
-
         degrees = {
                 (0,0) : 0,
                 (0,-1) : 0,
@@ -99,3 +99,28 @@ class Wall(GameObject):
     def __init__(self, g_pos):
         GameObject.__init__(self)
         self.rect.center = util.game2cscreen(g_pos)
+
+class SimpleTower(GameObject):
+    resource_name = 'wall.png'
+    damage = 1
+    radius = 3
+    recharge_time = 2
+
+    def __init__(self, g_pos):
+        GameObject.__init__(self)
+        self.rect.center = util.game2cscreen(g_pos)
+        self.recharge = 0
+        s_radius = self.radius * GAME_CELL_SIZE
+        self.s_reach_rect = Rect(0, 0, s_radius, s_radius)
+        self.s_reach_rect.center = game2screen(g_pos)
+
+    def target(self, creeps):
+        if self.recharge_time > 0:
+            return None
+
+        creep_rects = (c.rect for c in creeps)
+        collision_idx = self.s_reach_rect.collidelist(creep_rects)
+        if collision_idx == -1:
+            return None
+        else:
+            pass
