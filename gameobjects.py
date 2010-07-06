@@ -30,7 +30,7 @@ class Creep(GameObject):
     resource_name = 'creep.png'
     speed = 1.
     
-    def __init__(self, g_pos, field):
+    def __init__(self, g_pos, health, field):
         GameObject.__init__(self)
 
         self.g_pos = Vec(float(g_pos[0]), float(g_pos[1]))
@@ -39,6 +39,8 @@ class Creep(GameObject):
         self.curdst = None
         self.cursrc = None
         self.direction = Vec(0,1)
+        self.health = health
+        self.maxhealth = health
 
     @classmethod
     def get_img_rect(cls):
@@ -95,7 +97,9 @@ class Creep(GameObject):
         self.image = pygame.transform.rotate(self.img, degrees)
 
     def hurt(self, damage):
-        self.kill()
+        self.health -= damage
+        if self.health <= 0:
+            self.kill()
 
 class Wall(GameObject):
     resource_name = 'wall.png'

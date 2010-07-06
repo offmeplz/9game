@@ -70,8 +70,7 @@ class World(object):
         self.time = 0
         self.spawn_period = 2 * TICK_PER_SEC
 
-    def add_creep(self, pos, cls):
-        creep = cls(pos, self.field)
+    def add_creep(self, creep):
         creep.add([self.creeps])
 
     def add_tower(self, pos, cls):
@@ -106,7 +105,9 @@ class World(object):
         self.missles.draw(surface)
 
     def spawn_creep(self):
-        self.add_creep((GAME_X_SIZE / 2, GAME_Y_SIZE - 1), Creep)
+        creep_pos = GAME_X_SIZE / 2, GAME_Y_SIZE - 1
+        creep = Creep(creep_pos, 5, self.field)
+        self.add_creep(creep)
 
 
 class Field(object):
