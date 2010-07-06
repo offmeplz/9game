@@ -10,6 +10,7 @@ import pygame
 from pygame.locals import *
 
 import util
+from util import Vec
 import field
 from gameobjects import Creep, Wall, SimpleBullet
 from cfg import *
@@ -59,6 +60,7 @@ class World(object):
     def __init__(self):
         self.field = Field(GAME_X_SIZE, GAME_Y_SIZE)
         self.field.set_exit([(GAME_X_SIZE / 2,0)])
+        self.field.set_enter((GAME_X_SIZE / 2, GAME_Y_SIZE - 1))
 
         self.creeps = pygame.sprite.Group()
         self.towers = pygame.sprite.Group()
@@ -118,6 +120,7 @@ class Field(object):
         self._empty_fields = size_x * size_y
         self._exit_pos = set()
         self._recalculate_paths()
+        self.enter = None
 
     def set_exit(self, exit_positions):
         for pos in self.iter_pos():
@@ -129,6 +132,14 @@ class Field(object):
             cell = self._get_cell(pos)
             cell.is_exit = True
         self._recalculate_paths()
+
+    def set_enter(self, pos):
+        if not self.contains(pos):
+            raise ValueError, "Invalid pos: %s" % str(pos)
+        self.enter = tuple(pos)
+
+    def get_enter(self):
+        return self.enter
 
     def put(self, pos, obj):
         if not self.empty(pos):
@@ -152,7 +163,8 @@ class Field(object):
         self._recalculate_paths()
 
     def empty(self, pos):
-        return self.get_content(pos) is Nothing and tuple(pos) not in self._exit_pos
+        return self.get_content(pos) is Nothing and\
+               tuple(pos) not in self._exit_pos
 
     def _get_cell(self, pos):
         return self._field[pos[0]][pos[1]]
@@ -241,7 +253,8 @@ class Game(object):
             self._exit()
         elif event.type == MOUSEBUTTONDOWN and event.button == 1:
             game_pos = util.screen2game(event.pos)
-            if self.world.field.empty(game_pos) and game_pos != (0,0):
+            if self.world.field.empty(game_pos) and\
+                    tuple(game_pos) != self.world.field.enter:
                 self.world.add_tower(game_pos, Wall)
                 self.update_static_layer()
                 pygame.display.flip()
