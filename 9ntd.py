@@ -12,7 +12,7 @@ from pygame.locals import *
 import util
 from util import Vec
 import field
-from gameobjects import Creep, Wall, SimpleBullet
+from gameobjects import Creep, Wall, SimpleBullet, SimpleTower
 from cfg import *
 
 def norm(vec):
@@ -74,7 +74,13 @@ class World(object):
         creep.add([self.creeps])
 
     def add_tower(self, pos, cls):
-        tower = cls(pos)
+        if cls is Wall:
+            tower = cls(pos)
+        elif cls is SimpleTower:
+            tower = SimpleTower(pos, self.creeps, self.missles)
+        else:
+            raise ValueError, "Unknown tower type: %s" % repr(cls)
+
         if pygame.sprite.spritecollideany(tower, self.creeps):
             return False
         self.field.put(pos, tower)
@@ -106,7 +112,7 @@ class World(object):
 
     def spawn_creep(self):
         creep_pos = GAME_X_SIZE / 2, GAME_Y_SIZE - 1
-        creep = Creep(creep_pos, 5, self.field)
+        creep = Creep(creep_pos, 3, self.field)
         self.add_creep(creep)
 
 
@@ -256,7 +262,7 @@ class Game(object):
             game_pos = util.screen2game(event.pos)
             if self.world.field.empty(game_pos) and\
                     tuple(game_pos) != self.world.field.enter:
-                self.world.add_tower(game_pos, Wall)
+                self.world.add_tower(game_pos, SimpleTower)
                 self.update_static_layer()
                 pygame.display.flip()
         elif event.type == MOUSEBUTTONDOWN and event.button == 2:
