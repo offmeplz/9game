@@ -3,6 +3,7 @@
 
 from collections import deque
 from itertools import product
+import random
 from math import sqrt
 
 import pygame
@@ -10,7 +11,7 @@ from pygame.locals import *
 
 import util
 import field
-from gameobjects import Creep, Wall
+from gameobjects import Creep, Wall, SimpleBullet
 from cfg import *
 
 def norm(vec):
@@ -58,8 +59,11 @@ class World(object):
     def __init__(self):
         self.field = Field(GAME_X_SIZE, GAME_Y_SIZE)
         self.field.set_exit([(GAME_X_SIZE / 2,0)])
+
         self.creeps = pygame.sprite.Group()
         self.towers = pygame.sprite.Group()
+        self.missles = pygame.sprite.Group()
+
         self.next_spawn = 0
         self.time = 0
         self.spawn_period = 2 * TICK_PER_SEC
@@ -90,10 +94,14 @@ class World(object):
         if self.time > self.next_spawn:
             self.spawn_creep()
             self.next_spawn += self.spawn_period
+
+        self.towers.update(ticks)
         self.creeps.update(ticks)
+        self.missles.update(ticks)
 
     def draw(self, surface):
         self.creeps.draw(surface)
+        self.missles.draw(surface)
 
     def spawn_creep(self):
         self.add_creep((GAME_X_SIZE / 2, GAME_Y_SIZE - 1), Creep)
@@ -205,10 +213,11 @@ class Game(object):
         self._clock = pygame.time.Clock()
         self._state = 'PLAY'
         self.world = World()
-        self.back = pygame.Surface(self._screen.get_size())
-        self.back = self.back.convert()
+        self.background = pygame.Surface(self._screen.get_size()).convert()
+        self.ground = self.background.copy()
+        self.air = self.background.copy()
         color = (255,255,255)
-        self.back.fill(color)
+        self.background.fill(color)
 
     def _main_loop(self):
         while self._continue_main_loop:
@@ -216,7 +225,10 @@ class Game(object):
             events = pygame.event.get()
             for e in events:
                 self._dispatch_event(e)
-            self.world.creeps.clear(self._screen, self.back)
+
+            self.world.creeps.clear(self._screen, self.background)
+            self.world.missles.clear(self._screen, self.background)
+
             self.world.update(1)
             self.world.draw(self._screen)
             pygame.display.flip()
@@ -225,12 +237,17 @@ class Game(object):
         if (event.type == QUIT) or (
                 event.type == KEYDOWN and event.key == K_ESCAPE):
             self._exit()
-        elif event.type == MOUSEBUTTONDOWN:
+        elif event.type == MOUSEBUTTONDOWN and event.button == 1:
             game_pos = util.screen2game(event.pos)
             if self.world.field.empty(game_pos) and game_pos != (0,0):
                 self.world.add_tower(game_pos, Wall)
                 self._update_background()
                 pygame.display.flip()
+        elif event.type == MOUSEBUTTONDOWN and event.button == 2:
+            for creep in self.world.creeps:
+                b = SimpleBullet(util.screen2fgame(event.pos), creep, 1, 20)
+                b.add([self.world.missles])
+                break
 
     def _exit(self):
         self._state = 'EXIT'
@@ -238,20 +255,20 @@ class Game(object):
 
     def run(self):
         self._update_background()
-        self._screen.blit(self.back, (0,0))
+        self._screen.blit(self.background, (0,0))
         pygame.display.flip()
         self._main_loop()
         pygame.display.quit()
 
     def _update_background(self):
-        self._redraw_field(self.back)
-        self._redraw_arrows(self.back)
+        self._redraw_field(self.background)
+        self._redraw_arrows(self.background)
 
     def _redraw_field(self, surf):
         self._redraw_cells(self.world.field.extract_changed(), surf)
 
     def _redraw_cells(self, pos, surf):
-        self.world.towers.clear(self._screen, self.back)
+        self.world.towers.clear(self._screen, self.background)
         self.world.towers.draw(self._screen)
 
     def _redraw_arrows(self, surf):
