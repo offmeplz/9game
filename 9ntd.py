@@ -144,7 +144,7 @@ class Field(object):
         self._recalculate_paths()
 
     def empty(self, pos):
-        return self.get_content(pos) is Nothing
+        return self.get_content(pos) is Nothing and tuple(pos) not in self._exit_pos
 
     def _get_cell(self, pos):
         return self._field[pos[0]][pos[1]]
