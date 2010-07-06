@@ -238,6 +238,7 @@ class Game(object):
         panel_rect = Rect((field_x_size, 0), (panel_x_size, panel_y_size))
         self._panel_surface = self._screen.subsurface(panel_rect)
         self._restart()
+        self._game_speed = 1
 
     def _restart(self):
         self._continue_main_loop = True
@@ -264,7 +265,7 @@ class Game(object):
             self.world.creeps.clear(self._field_surface, self.static)
             self.world.missles.clear(self._field_surface, self.static)
 
-            self.world.update(1)
+            self.world.update(self._game_speed)
             self.world.draw(self._field_surface)
             pygame.display.flip()
 
@@ -272,6 +273,12 @@ class Game(object):
         if (event.type == QUIT) or (
                 event.type == KEYDOWN and event.key == K_ESCAPE):
             self._exit()
+        elif event.type == KEYDOWN:
+            if event.key == K_SPACE:
+                self._game_speed = 4
+        elif event.type == KEYUP:
+            if event.key == K_SPACE:
+                self._game_speed = 1
         elif event.type == MOUSEBUTTONDOWN:
             if self._field_surface.get_rect().collidepoint(event.pos):
                 if event.button == 1:
