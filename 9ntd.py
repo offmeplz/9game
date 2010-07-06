@@ -214,10 +214,12 @@ class Game(object):
         self._state = 'PLAY'
         self.world = World()
         self.background = pygame.Surface(self._screen.get_size()).convert()
-        self.ground = self.background.copy()
-        self.air = self.background.copy()
         color = (255,255,255)
         self.background.fill(color)
+
+        self.static = self.background.copy()
+        self.ground = self.background.copy()
+        self.air = self.background.copy()
 
     def _main_loop(self):
         while self._continue_main_loop:
@@ -226,8 +228,8 @@ class Game(object):
             for e in events:
                 self._dispatch_event(e)
 
-            self.world.creeps.clear(self._screen, self.background)
-            self.world.missles.clear(self._screen, self.background)
+            self.world.creeps.clear(self._screen, self.static)
+            self.world.missles.clear(self._screen, self.static)
 
             self.world.update(1)
             self.world.draw(self._screen)
@@ -241,7 +243,7 @@ class Game(object):
             game_pos = util.screen2game(event.pos)
             if self.world.field.empty(game_pos) and game_pos != (0,0):
                 self.world.add_tower(game_pos, Wall)
-                self._update_background()
+                self.update_static_layer()
                 pygame.display.flip()
         elif event.type == MOUSEBUTTONDOWN and event.button == 2:
             for creep in self.world.creeps:
@@ -254,18 +256,16 @@ class Game(object):
         self._continue_main_loop = False
 
     def run(self):
-        self._update_background()
-        self._screen.blit(self.background, (0,0))
+        self.update_static_layer()
         pygame.display.flip()
         self._main_loop()
         pygame.display.quit()
 
-    def _update_background(self):
-        self._redraw_field(self.background)
-        self._redraw_arrows(self.background)
-
-    def _redraw_field(self, surf):
-        self._redraw_cells(self.world.field.extract_changed(), surf)
+    def update_static_layer(self):
+        self.static.blit(self.background, (0,0))
+        self._redraw_arrows(self.static)
+        self.world.towers.draw(self.static)
+        self._screen.blit(self.static, (0,0))
 
     def _redraw_cells(self, pos, surf):
         self.world.towers.clear(self._screen, self.background)
