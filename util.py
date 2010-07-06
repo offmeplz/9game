@@ -115,6 +115,9 @@ class Vec(object):
 
     def __str__(self):
         return "Vec(%s,%s)" % (str(self.x), str(self.y))
+    
+    def __repr__(self):
+        return str(self)
 
     def __abs__(self):
         return math.sqrt(self.x ** 2 + self.y ** 2)
