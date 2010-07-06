@@ -94,11 +94,57 @@ class Creep(GameObject):
                 (1, 0) : 270}[tuple(self.direction)]
         self.image = pygame.transform.rotate(self.img, degrees)
 
+    def hurt(self, damage):
+        self.kill()
+
 class Wall(GameObject):
     resource_name = 'wall.png'
     def __init__(self, g_pos):
         GameObject.__init__(self)
         self.rect.center = util.game2cscreen(g_pos)
+
+class SimpleBullet(GameObject):
+    radius = 3
+    image = None
+    rect = None
+
+    @classmethod
+    def get_img_rect(cls):
+        size = cls.radius * 2 - 1
+        if cls.image is None:
+            cls.image = pygame.surface.Surface((size, size)).convert()
+            cls.image.fill(pygame.Color(255, 255, 255, 0))
+            cls.rect = cls.image.get_rect()
+            pygame.draw.circle(cls.image, (0,0,0), cls.rect.center, cls.radius)
+        return cls.image, cls.rect
+
+    def __init__(self, g_pos, target, damage, speed=None):
+        GameObject.__init__(self)
+        self.g_pos = Vec(g_pos)
+        self.target = target
+        self.damage = damage
+        self.speed = speed
+        rect_size = self.radius * 2 - 1
+        self.rect.center = util.game2cscreen(g_pos)
+
+    def update(self, ticks):
+        if not self.target.alive():
+            self.kill()
+        cur_speed = float(ticks * self.speed) / TICK_PER_SEC
+        v = Vec(self.target.g_pos) - Vec(self.g_pos)
+        if abs(v) > cur_speed:
+            v *= cur_speed / abs(v)
+            self.g_pos += v
+            self.rect.center = util.game2cscreen(self.g_pos)
+        else:
+            self.g_pos = self.target.g_pos
+            self.rect.center = util.game2cscreen(self.g_pos)
+            self.explode()
+
+    def explode(self):
+        self.target.hurt(self.damage)
+        self.kill()
+        
 
 class SimpleTower(GameObject):
     resource_name = 'wall.png'
