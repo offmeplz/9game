@@ -299,7 +299,8 @@ class Game(object):
 
     def update_static_layer(self):
         self.static.blit(self.background, (0,0))
-        self._redraw_arrows(self.static)
+        if DRAW_ARROWS:
+            self._redraw_arrows(self.static)
         self.world.towers.draw(self.static)
         self._field_surface.blit(self.static, (0,0))
 
