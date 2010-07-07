@@ -8,8 +8,11 @@ GAME_Y_SIZE = 13
 # Size in pixels of one game cell.
 GAME_CELL_SIZE = 32
 
-# Panel width.
-PANEL_X_SIZE = 100
+# Panel height
+MAIN_PANEL_Y_SIZE = 100
+
+TOP_PANEL_Y_SIZE = 20
+
 
 TICK_PER_SEC = 30
 

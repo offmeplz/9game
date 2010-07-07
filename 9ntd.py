@@ -257,19 +257,26 @@ class Game(object):
         field_x_size = GAME_X_SIZE * GAME_CELL_SIZE
         field_y_size = GAME_Y_SIZE * GAME_CELL_SIZE
 
-        panel_x_size = PANEL_X_SIZE
-        panel_y_size = field_x_size
+        panel_x_size = field_x_size
+        panel_y_size = MAIN_PANEL_Y_SIZE
 
-        window_x_size = field_x_size + panel_x_size
-        window_y_size = field_y_size
+        top_panel_x_size = field_x_size
+        top_panel_y_size = TOP_PANEL_Y_SIZE
+
+        window_x_size = field_x_size
+        window_y_size = field_y_size + panel_y_size + top_panel_y_size
         
         window = pygame.display.set_mode((window_x_size, window_y_size))
         self._screen = pygame.display.get_surface()
-        field_rect = Rect((0,0), (field_x_size, field_y_size))
+        field_rect = Rect((0,top_panel_y_size), (field_x_size, field_y_size))
+        self._field_rect = field_rect
         self._field_surface = self._screen.subsurface(field_rect)
 
-        panel_rect = Rect((field_x_size, 0), (panel_x_size, panel_y_size))
+        panel_rect = Rect((0, top_panel_y_size + field_y_size), (panel_x_size, panel_y_size))
         self._panel_surface = self._screen.subsurface(panel_rect)
+
+        top_panel_rect = Rect((0,0), (top_panel_x_size, top_panel_y_size))
+        self._top_panel_surface = self._screen.subsurface(top_panel_rect)
         self._restart()
         self._game_speed = 1
 
@@ -313,9 +320,10 @@ class Game(object):
             if event.key == K_SPACE:
                 self._game_speed = 1
         elif event.type == MOUSEBUTTONDOWN:
-            if self._field_surface.get_rect().collidepoint(event.pos):
+            if self._field_rect.collidepoint(event.pos):
+                pos = Vec(event.pos) - Vec(self._field_rect.topleft)
                 if event.button == 1:
-                    game_pos = util.screen2game(event.pos)
+                    game_pos = util.screen2game(pos)
                     if self.world.field.empty(game_pos) and\
                             tuple(game_pos) != self.world.field.enter:
                         self.world.add_tower(game_pos, SimpleTower)
@@ -323,7 +331,7 @@ class Game(object):
                         pygame.display.flip()
                 elif event.button == 2:
                     for creep in self.world.creeps:
-                        b = SimpleBullet(util.screen2fgame(event.pos), creep, 1, 20)
+                        b = SimpleBullet(util.screen2fgame(pos), creep, 1, 20)
                         b.add([self.world.missles])
                         break
 
@@ -359,6 +367,7 @@ class Game(object):
 
     def update_panel(self):
         self._panel_surface.fill((150, 150, 150))
+        self._top_panel_surface.fill((150, 150, 150))
 
 if __name__ == '__main__':
     g = Game()
