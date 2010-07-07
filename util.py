@@ -54,6 +54,35 @@ def signum(num):
     else:
         return 0
 
+def collideline(rect, line):
+    """
+    Check if line collide rectangle.
+    rect should be Rect object.
+    line should be a pair of points.
+    """
+    p1, p2 = line
+    if p1 == p2:
+        return rect.collidepoint(p1)
+
+    # Check if rect with (p1,p2) as diagonal collides rect.
+    linerect = Rect(
+            (min(p1[0], p2[0]), min(p1[1], p2[1])),
+            (abs(p1[0] - p2[0]), abs(p1[1] - p2[1])))
+    if not rect.collide(linerect):
+        return False
+
+    # Check if both half planes (formed by line) have at least one rect corner.
+    sides = [False, False]
+    for p in (rect.topleft, rect.topright, rect.bottomleft, rect.bottomright):
+        v = (p2[0] - p1[0]) * (p[1] - p1[1]) - (p2[1] - p1[1]) * (p[0] - p1[0])
+        if v >= 0:
+            sides[0] = True
+        if v <= 0:
+            sides[1] = True
+
+    return sides[0] and sides[1]
+
+
 class Vec(object):
     def __init__(self, x, y=None):
         if y is None:
