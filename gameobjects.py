@@ -191,7 +191,7 @@ class SimpleBullet(GameObject):
         
 
 class SimpleTower(GameObject):
-    resource_name = 'wall.png'
+    resource_name = 'simpletower.png'
     damage = 1
     radius = 3
     sqradius = radius ** 2
