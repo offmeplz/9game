@@ -68,6 +68,9 @@ class Creep(GameObject):
         self.rect.center = util.game2cscreen(self.g_pos)
 
     def _find_next_dst(self):
+        return self.field.get_next_pos(self.current_cell())
+
+    def _find_next_wp(self):
         cur_cell = self.current_cell()
         cur_direction = self.field.get_direction(cur_cell)
 
