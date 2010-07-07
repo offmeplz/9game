@@ -3,14 +3,16 @@
 
 from collections import deque
 from itertools import product
+import random
 from math import sqrt
 
 import pygame
 from pygame.locals import *
 
 import util
+from util import Vec
 import field
-from gameobjects import Creep, Wall
+from gameobjects import Creep, Wall, SimpleBullet, SimpleTower
 from cfg import *
 
 def norm(vec):
@@ -58,18 +60,27 @@ class World(object):
     def __init__(self):
         self.field = Field(GAME_X_SIZE, GAME_Y_SIZE)
         self.field.set_exit([(GAME_X_SIZE / 2,0)])
+        self.field.set_enter((GAME_X_SIZE / 2, GAME_Y_SIZE - 1))
+
         self.creeps = pygame.sprite.Group()
         self.towers = pygame.sprite.Group()
+        self.missles = pygame.sprite.Group()
+
         self.next_spawn = 0
         self.time = 0
         self.spawn_period = 2 * TICK_PER_SEC
 
-    def add_creep(self, pos, cls):
-        creep = cls(pos, self.field)
+    def add_creep(self, creep):
         creep.add([self.creeps])
 
     def add_tower(self, pos, cls):
-        tower = cls(pos)
+        if cls is Wall:
+            tower = cls(pos)
+        elif cls is SimpleTower:
+            tower = SimpleTower(pos, self.creeps, self.missles)
+        else:
+            raise ValueError, "Unknown tower type: %s" % repr(cls)
+
         if pygame.sprite.spritecollideany(tower, self.creeps):
             return False
         self.field.put(pos, tower)
@@ -90,13 +101,19 @@ class World(object):
         if self.time > self.next_spawn:
             self.spawn_creep()
             self.next_spawn += self.spawn_period
+
+        self.towers.update(ticks)
         self.creeps.update(ticks)
+        self.missles.update(ticks)
 
     def draw(self, surface):
         self.creeps.draw(surface)
+        self.missles.draw(surface)
 
     def spawn_creep(self):
-        self.add_creep((GAME_X_SIZE / 2, GAME_Y_SIZE - 1), Creep)
+        creep_pos = GAME_X_SIZE / 2, GAME_Y_SIZE - 1
+        creep = Creep(creep_pos, 3, self.field, self.towers)
+        self.add_creep(creep)
 
 
 class Field(object):
@@ -110,6 +127,7 @@ class Field(object):
         self._empty_fields = size_x * size_y
         self._exit_pos = set()
         self._recalculate_paths()
+        self.enter = None
 
     def set_exit(self, exit_positions):
         for pos in self.iter_pos():
@@ -121,6 +139,14 @@ class Field(object):
             cell = self._get_cell(pos)
             cell.is_exit = True
         self._recalculate_paths()
+
+    def set_enter(self, pos):
+        if not self.contains(pos):
+            raise ValueError, "Invalid pos: %s" % str(pos)
+        self.enter = tuple(pos)
+
+    def get_enter(self):
+        return self.enter
 
     def put(self, pos, obj):
         if not self.empty(pos):
@@ -144,7 +170,8 @@ class Field(object):
         self._recalculate_paths()
 
     def empty(self, pos):
-        return self.get_content(pos) is Nothing and tuple(pos) not in self._exit_pos
+        return self.get_content(pos) is Nothing and\
+               tuple(pos) not in self._exit_pos
 
     def _get_cell(self, pos):
         return self._field[pos[0]][pos[1]]
@@ -173,42 +200,93 @@ class Field(object):
                 if self.contains(pos) and self.empty(pos)]
 
     def _recalculate_paths(self):
-        self.dir_field = field.build_right_angle_dir_field(self, self._exit_pos)
+        self.dir_field = field.build_dir_field(self, self._exit_pos)
 
     def set_dir_field(self, dir_field):
         self.dir_field = dir_field
 
     def get_next_pos(self, pos):
+        d = self.get_direction(pos)
+        if d is None:
+            return None
+        else:
+            return self.get_direction(pos).next_vertex
+
+
+    def is_exit(self, pos):
+        return tuple(pos) in self._exit_pos
+
+    def get_direction(self, pos):
         pos = tuple(pos)
         direction = self.dir_field.get(pos, None)
         if direction is None:
             return None
         else:
-            return direction.next_vertex
+            return direction
 
-    def in_edges(self, endpos):
-        return [field.Edge(begpos, endpos, 1)
-                for begpos in self.get_neighbours(endpos)]
+    def in_edges(self, pos):
+        sq2 = sqrt(2)
+        neighbours = [
+                    ((pos[0] + 1, pos[1]), 1),
+                    ((pos[0] + 1, pos[1] + 1), sq2),
+                    ((pos[0], pos[1] + 1), 1),
+                    ((pos[0] - 1, pos[1] + 1), sq2),
+                    ((pos[0] - 1, pos[1]), 1),
+                    ((pos[0] - 1, pos[1] - 1), sq2),
+                    ((pos[0], pos[1] - 1), 1),
+                    ((pos[0] + 1, pos[1] - 1), sq2)]
+        for i,n in enumerate(neighbours):
+            if self.contains(n[0]) and self.empty(n[0]):
+                good = False
+                if i % 2 == 0:
+                    good = True
+                else:
+                    ni = neighbours[(i + 1) % len(neighbours)]
+                    pi = neighbours[(i - 1) % len(neighbours)]
+                    if self.contains(ni[0]) and self.empty(ni[0]) and\
+                       self.contains(pi[0]) and self.empty(pi[0]):
+                           good = True
+                if good:
+                    yield field.Edge(n[0], pos, n[1])
+
 
 class Game(object):
     def __init__(self):
         pygame.init()
         pygame.display.set_caption('9nMaze')
-        x_size = GAME_X_SIZE * GAME_CELL_SIZE
-        y_size = GAME_Y_SIZE * GAME_CELL_SIZE
-        window = pygame.display.set_mode((x_size, y_size))
+        field_x_size = GAME_X_SIZE * GAME_CELL_SIZE
+        field_y_size = GAME_Y_SIZE * GAME_CELL_SIZE
+
+        panel_x_size = PANEL_X_SIZE
+        panel_y_size = field_x_size
+
+        window_x_size = field_x_size + panel_x_size
+        window_y_size = field_y_size
+        
+        window = pygame.display.set_mode((window_x_size, window_y_size))
         self._screen = pygame.display.get_surface()
+        field_rect = Rect((0,0), (field_x_size, field_y_size))
+        self._field_surface = self._screen.subsurface(field_rect)
+
+        panel_rect = Rect((field_x_size, 0), (panel_x_size, panel_y_size))
+        self._panel_surface = self._screen.subsurface(panel_rect)
         self._restart()
+        self._game_speed = 1
 
     def _restart(self):
         self._continue_main_loop = True
         self._clock = pygame.time.Clock()
         self._state = 'PLAY'
         self.world = World()
-        self.back = pygame.Surface(self._screen.get_size())
-        self.back = self.back.convert()
+        self.background = pygame.Surface(self._field_surface.get_size()).convert()
         color = (255,255,255)
-        self.back.fill(color)
+        self.background.fill(color)
+
+        self.static = self.background.copy()
+        self.ground = self.background.copy()
+        self.air = self.background.copy()
+
+        self.update_panel()
 
     def _main_loop(self):
         while self._continue_main_loop:
@@ -216,43 +294,59 @@ class Game(object):
             events = pygame.event.get()
             for e in events:
                 self._dispatch_event(e)
-            self.world.creeps.clear(self._screen, self.back)
-            self.world.update(1)
-            self.world.draw(self._screen)
+
+            self.world.creeps.clear(self._field_surface, self.static)
+            self.world.missles.clear(self._field_surface, self.static)
+
+            self.world.update(self._game_speed)
+            self.world.draw(self._field_surface)
             pygame.display.flip()
 
     def _dispatch_event(self, event):
         if (event.type == QUIT) or (
                 event.type == KEYDOWN and event.key == K_ESCAPE):
             self._exit()
+        elif event.type == KEYDOWN:
+            if event.key == K_SPACE:
+                self._game_speed = 4
+        elif event.type == KEYUP:
+            if event.key == K_SPACE:
+                self._game_speed = 1
         elif event.type == MOUSEBUTTONDOWN:
-            game_pos = util.screen2game(event.pos)
-            if self.world.field.empty(game_pos) and game_pos != (0,0):
-                self.world.add_tower(game_pos, Wall)
-                self._update_background()
-                pygame.display.flip()
+            if self._field_surface.get_rect().collidepoint(event.pos):
+                if event.button == 1:
+                    game_pos = util.screen2game(event.pos)
+                    if self.world.field.empty(game_pos) and\
+                            tuple(game_pos) != self.world.field.enter:
+                        self.world.add_tower(game_pos, SimpleTower)
+                        self.update_static_layer()
+                        pygame.display.flip()
+                elif event.button == 2:
+                    for creep in self.world.creeps:
+                        b = SimpleBullet(util.screen2fgame(event.pos), creep, 1, 20)
+                        b.add([self.world.missles])
+                        break
 
     def _exit(self):
         self._state = 'EXIT'
         self._continue_main_loop = False
 
     def run(self):
-        self._update_background()
-        self._screen.blit(self.back, (0,0))
+        self.update_static_layer()
         pygame.display.flip()
         self._main_loop()
         pygame.display.quit()
 
-    def _update_background(self):
-        self._redraw_field(self.back)
-        self._redraw_arrows(self.back)
-
-    def _redraw_field(self, surf):
-        self._redraw_cells(self.world.field.extract_changed(), surf)
+    def update_static_layer(self):
+        self.static.blit(self.background, (0,0))
+        if DRAW_ARROWS:
+            self._redraw_arrows(self.static)
+        self.world.towers.draw(self.static)
+        self._field_surface.blit(self.static, (0,0))
 
     def _redraw_cells(self, pos, surf):
-        self.world.towers.clear(self._screen, self.back)
-        self.world.towers.draw(self._screen)
+        self.world.towers.clear(self._field_surface, self.background)
+        self.world.towers.draw(self._field_surface)
 
     def _redraw_arrows(self, surf):
         color = (255, 0, 0)
@@ -262,6 +356,9 @@ class Game(object):
                 center = util.game2cscreen(pos)
                 n_center = util.game2cscreen(n_pos)
                 draw_arrow(surf, color, center, n_center)
+
+    def update_panel(self):
+        self._panel_surface.fill((150, 150, 150))
 
 if __name__ == '__main__':
     g = Game()

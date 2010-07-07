@@ -5,6 +5,8 @@ import math
 import os
 import pygame
 
+from pygame import Rect
+
 from cfg import *
 
 def load_image(name):
@@ -20,6 +22,11 @@ def load_image(name):
 def screen2game(screen_pos):
     s_x, s_y = screen_pos
     g_x, g_y = s_x / GAME_CELL_SIZE, s_y / GAME_CELL_SIZE
+    return g_x, g_y
+
+def screen2fgame(screen_pos):
+    s_x, s_y = screen_pos
+    g_x, g_y = s_x / float(GAME_CELL_SIZE), s_y / float(GAME_CELL_SIZE)
     return g_x, g_y
 
 def game2screen(game_pos):
@@ -49,10 +56,91 @@ def signum(num):
     else:
         return 0
 
+
+def collideline(rect, line):
+    """
+    Check if line collide rectangle.
+
+    rect - Rect object.
+    line - a pair of points.
+    """
+    p1, p2 = line
+    if p1 == p2:
+        return rect.collidepoint(p1)
+
+    # Check if rect with (p1,p2) as diagonal collides rect.
+    linerect = Rect(
+            (min(p1[0], p2[0]), min(p1[1], p2[1])),
+            (abs(p1[0] - p2[0]), abs(p1[1] - p2[1])))
+    if not rect.colliderect(linerect):
+        return False
+
+    # Check if both half planes (formed by line) have at least one rect corner.
+    sides = [False, False]
+    for p in (rect.topleft, rect.topright, rect.bottomleft, rect.bottomright):
+        v = (p2[0] - p1[0]) * (p[1] - p1[1]) - (p2[1] - p1[1]) * (p[0] - p1[0])
+        if v >= 0:
+            sides[0] = True
+        if v <= 0:
+            sides[1] = True
+
+    return sides[0] and sides[1]
+
+
+def anycollideline(rects, line):
+    '''
+    Check if any of rectangles collides line.
+
+    rects - iterable of Rect.
+    line - a pair of points.
+    '''
+    p1, p2 = line
+    if p1 == p2:
+        return any(r.collidepoint(p1) for r in rects)
+
+    linerect = Rect(
+            (min(p1[0], p2[0]), min(p1[1], p2[1])),
+            (abs(p1[0] - p2[0]), abs(p1[1] - p2[1])))
+
+    for rect in rects:
+        if rect.colliderect(linerect):
+            sides = [False, False]
+            for p in (rect.topleft, rect.topright, rect.bottomleft, rect.bottomright):
+                v = (p2[0] - p1[0]) * (p[1] - p1[1]) - (p2[1] - p1[1]) * (p[0] - p1[0])
+                if v >= 0:
+                    sides[0] = True
+                if v <= 0:
+                    sides[1] = True
+            if sides[0] and sides[1]:
+                return True
+    return False
+
+
+def is_walkable(begin, end, radius, sprites):
+    if begin == end:
+        raise ValueError, 'begin and end are the same'
+    begin = Vec(begin)
+    end = Vec(end)
+    linevec = end - begin
+    shift = linevec.perpendicular()
+    shift *= radius / abs(shift)
+    line1 = (begin + shift, end + shift)
+    if anycollideline((s.rect for s in sprites), line1):
+        return False
+    line2 = (begin - shift, end - shift)
+    if anycollideline((s.rect for s in sprites), line2):
+        return False
+    return True
+
+
 class Vec(object):
     def __init__(self, x, y=None):
         if y is None:
-            self.x, self.y = x
+            if isinstance(x, Vec):
+                self.x = x.x
+                self.y = x.y
+            else:
+                self.x, self.y = x
         else:
             self.x, self.y = x, y
 
@@ -115,6 +203,21 @@ class Vec(object):
 
     def __str__(self):
         return "Vec(%s,%s)" % (str(self.x), str(self.y))
+    
+    def __repr__(self):
+        return str(self)
 
     def __abs__(self):
         return math.sqrt(self.x ** 2 + self.y ** 2)
+
+    def __eq__(self, other):
+        if hasattr(other, '__getitem__') and len(other) == 2:
+            return self.x == other[0] and self.y == other[1]
+        else:
+            return False
+
+    def __ne__(self, other):
+        return not self == other
+
+    def perpendicular(self):
+        return Vec(self.y, -self.x)
