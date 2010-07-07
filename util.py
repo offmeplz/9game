@@ -55,6 +55,7 @@ def signum(num):
         return 0
 
 class Vec(object):
+    __slots__ = ['x', 'y']
     def __init__(self, x, y=None):
         if y is None:
             self.x, self.y = x
