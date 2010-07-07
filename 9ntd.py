@@ -206,7 +206,12 @@ class Field(object):
         self.dir_field = dir_field
 
     def get_next_pos(self, pos):
-        return self.get_direction(pos).next_vertex
+        d = self.get_direction(pos)
+        if d is None:
+            return None
+        else:
+            return self.get_direction(pos).next_vertex
+
 
     def is_exit(self, pos):
         return tuple(pos) in self._exit_pos
