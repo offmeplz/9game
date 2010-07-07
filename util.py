@@ -155,3 +155,12 @@ class Vec(object):
 
     def __abs__(self):
         return math.sqrt(self.x ** 2 + self.y ** 2)
+
+    def __eq__(self, other):
+        if hasattr(other, '__getitem__') and len(other) == 2:
+            return self.x == other[0] and self.y == other[1]
+        else:
+            return False
+
+    def __ne__(self, other):
+        return not self == other
