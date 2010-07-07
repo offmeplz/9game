@@ -325,7 +325,7 @@ class Game(object):
                 draw_arrow(surf, color, center, n_center)
 
     def update_panel(self):
-        self._panel_surface.fill((255, 255, 255))
+        self._panel_surface.fill((150, 150, 150))
 
 if __name__ == '__main__':
     g = Game()
