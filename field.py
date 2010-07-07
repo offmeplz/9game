@@ -2,6 +2,7 @@
 #vim:fileencoding=utf-8
 
 from collections import deque
+from heapq import heappush, heappop
 
 class Direction(object):
     def __init__(self, distance, next_vertex):
@@ -33,4 +34,22 @@ def build_right_angle_dir_field(graph, exits):
                 queue.append(npoint)
             else:
                 assert field[npoint].distance <= curdistance + 1
+    return field
+
+def build_dir_field(graph, exits):
+    priority_queue = []
+    field = {}
+    for e in exits:
+        field[e] = Direction(0, None)
+        heappush(priority_queue, (0, e))
+
+    while priority_queue:
+        curdist, curpoint = heappop(priority_queue)
+        for edge in graph.in_edges(curpoint):
+            npoint = edge.begin
+            edgedist = edge.score
+            ndist = curdist + edgedist
+            if npoint not in field or field[npoint].distance > ndist:
+                field[npoint] = Direction(ndist, curpoint)
+                heappush(priority_queue, (ndist, npoint))
     return field

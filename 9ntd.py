@@ -200,7 +200,7 @@ class Field(object):
                 if self.contains(pos) and self.empty(pos)]
 
     def _recalculate_paths(self):
-        self.dir_field = field.build_right_angle_dir_field(self, self._exit_pos)
+        self.dir_field = field.build_dir_field(self, self._exit_pos)
 
     def set_dir_field(self, dir_field):
         self.dir_field = dir_field
@@ -224,9 +224,31 @@ class Field(object):
         else:
             return direction
 
-    def in_edges(self, endpos):
-        return [field.Edge(begpos, endpos, 1)
-                for begpos in self.get_neighbours(endpos)]
+    def in_edges(self, pos):
+        sq2 = sqrt(2)
+        neighbours = [
+                    ((pos[0] + 1, pos[1]), 1),
+                    ((pos[0] + 1, pos[1] + 1), sq2),
+                    ((pos[0], pos[1] + 1), 1),
+                    ((pos[0] - 1, pos[1] + 1), sq2),
+                    ((pos[0] - 1, pos[1]), 1),
+                    ((pos[0] - 1, pos[1] - 1), sq2),
+                    ((pos[0], pos[1] - 1), 1),
+                    ((pos[0] + 1, pos[1] - 1), sq2)]
+        for i,n in enumerate(neighbours):
+            if self.contains(n[0]) and self.empty(n[0]):
+                good = False
+                if i % 2 == 0:
+                    good = True
+                else:
+                    ni = neighbours[(i + 1) % len(neighbours)]
+                    pi = neighbours[(i - 1) % len(neighbours)]
+                    if self.contains(ni[0]) and self.empty(ni[0]) and\
+                       self.contains(pi[0]) and self.empty(pi[0]):
+                           good = True
+                if good:
+                    yield field.Edge(n[0], pos, n[1])
+
 
 class Game(object):
     def __init__(self):
