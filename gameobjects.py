@@ -168,6 +168,10 @@ class SimpleBullet(GameObject):
         self.rect.center = util.game2cscreen(g_pos)
 
     def update(self, ticks):
+        if self.target is None:
+            self.kill()
+            return
+
         if not self.target.alive():
             self.kill()
         cur_speed = float(ticks * self.speed) / TICK_PER_SEC
@@ -183,7 +187,7 @@ class SimpleBullet(GameObject):
 
     def explode(self):
         self.target.hurt(self.damage)
-        self.kill()
+        self.target = None
         
 
 class SimpleTower(GameObject):
