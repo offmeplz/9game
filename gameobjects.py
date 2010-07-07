@@ -102,22 +102,35 @@ class Creep(GameObject):
 
     def change_direction(self, new_direction):
         direction = new_direction
-        if abs(direction[0]) < abs(direction[1]):
+        need_cut = False
+        if 2 * abs(direction[0]) < abs(direction[1]):
             direction[0] = 0
             direction[1] = signum(direction[1])
-        else:
+        elif 2 * abs(direction[1]) < abs(direction[0]):
             direction[1] = 0
             direction[0] = signum(direction[0])
+        else:
+            direction[0] = signum(direction[0])
+            direction[1] = signum(direction[1])
+            need_cut = True
+
         if direction == self.direction:
             return
         self.direction = direction
         degrees = {
-                (0,0) : 0,
-                (0,-1) : 0,
-                (-1,0) : 90,
-                (0, 1) : 180,
-                (1, 0) : 270}[tuple(self.direction)]
+                ( 0, 0): 0,
+                ( 0,-1): 0,
+                (-1,-1): 45,
+                (-1, 0): 90,
+                (-1, 1): 135,
+                ( 0, 1): 180,
+                ( 1, 1): 225,
+                ( 1, 0): 270,
+                ( 1,-1): 315}[tuple(self.direction)]
         self.image = pygame.transform.rotate(self.img, degrees)
+        if need_cut:
+            bound_rect = self.image.get_bounding_rect()
+            self.image = self.image.subsurface(bound_rect)
 
     def hurt(self, damage):
         self.health -= damage
