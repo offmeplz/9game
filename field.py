@@ -7,6 +7,7 @@ class Direction(object):
     def __init__(self, distance, next_vertex):
         self.distance = distance
         self.next_vertex = next_vertex
+        self.next_waypoint = None
 
 class Edge(object):
     def __init__(self, begin, end, score):

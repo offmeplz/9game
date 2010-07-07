@@ -30,17 +30,17 @@ class Creep(GameObject):
     resource_name = 'creep.png'
     speed = 1.
     
-    def __init__(self, g_pos, health, field):
+    def __init__(self, g_pos, health, field, towers):
         GameObject.__init__(self)
 
         self.g_pos = Vec(float(g_pos[0]), float(g_pos[1]))
         self.field = field
         self.rect.center = util.game2cscreen(g_pos)
         self.curdst = None
-        self.cursrc = None
         self.direction = Vec(0,1)
         self.health = health
         self.maxhealth = health
+        self.towers = towers
 
     @classmethod
     def get_img_rect(cls):
@@ -49,15 +49,14 @@ class Creep(GameObject):
         return cls.img, cls.img_rect.copy()
 
     def update(self, ticks):
-        g_pos = self.current_cell()
-        cur_cell = self.field._get_cell(g_pos)
+        cell_pos = self.current_cell()
+        cur_cell = self.field._get_cell(cell_pos)
         if self.curdst is None:
             if cur_cell.is_exit:
                 self.finish()
                 return
-            dst = self.field.get_next_pos(g_pos)
+            dst = self._find_next_dst()
             self.curdst = Vec(dst)
-            self.cursrc = Vec(g_pos)
         dstvec = self.curdst - self.g_pos
         vecnorm = ticks * self.speed / float(TICK_PER_SEC)
         if abs(dstvec) <= vecnorm:
@@ -68,8 +67,29 @@ class Creep(GameObject):
         self.change_direction(dstvec)
         self.rect.center = util.game2cscreen(self.g_pos)
 
+    def _find_next_dst(self):
+        cur_cell = self.current_cell()
+        cur_direction = self.field.get_direction(cur_cell)
+
+        if cur_direction.next_waypoint is not None:
+            return cur_direction.next_waypoint
+
+        radius = self.rect.width / 2
+        s_cur_pos = util.game2cscreen(self.g_pos)
+        dst = self.field.get_next_pos(cur_cell)
+        while not self.field.is_exit(dst):
+            nextdst = self.field.get_next_pos(dst)
+            s_nextdst = util.game2cscreen(nextdst)
+            walkable = util.is_walkable(
+                    s_cur_pos, s_nextdst, radius, self.towers)
+            if not walkable:
+                break
+            dst = nextdst
+        cur_direction.next_waypoint = dst
+        return dst
+
     def forget_way(self):
-        self.curdst, self.cursrc = None, None
+        self.curdst = None
 
     def finish(self):
         self.kill()

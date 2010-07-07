@@ -112,7 +112,7 @@ class World(object):
 
     def spawn_creep(self):
         creep_pos = GAME_X_SIZE / 2, GAME_Y_SIZE - 1
-        creep = Creep(creep_pos, 3, self.field)
+        creep = Creep(creep_pos, 3, self.field, self.towers)
         self.add_creep(creep)
 
 
@@ -206,12 +206,18 @@ class Field(object):
         self.dir_field = dir_field
 
     def get_next_pos(self, pos):
+        return self.get_direction(pos).next_vertex
+
+    def is_exit(self, pos):
+        return tuple(pos) in self._exit_pos
+
+    def get_direction(self, pos):
         pos = tuple(pos)
         direction = self.dir_field.get(pos, None)
         if direction is None:
             return None
         else:
-            return direction.next_vertex
+            return direction
 
     def in_edges(self, endpos):
         return [field.Edge(begpos, endpos, 1)
