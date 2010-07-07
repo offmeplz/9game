@@ -32,9 +32,9 @@ def draw_arrow(surface, color, begin, end):
     side_end1 = side_vec1[0] + end[0], side_vec1[1] + end[1]
     side_end2 = side_vec2[0] + end[0], side_vec2[1] + end[1]
 
-    pygame.draw.line(surface, color, begin, end)
-    pygame.draw.line(surface, color, end, side_end1)
-    pygame.draw.line(surface, color, end, side_end2)
+    pygame.draw.aaline(surface, color, begin, end)
+    pygame.draw.aaline(surface, color, end, side_end1)
+    pygame.draw.aaline(surface, color, end, side_end2)
 
 
 class NothingType(object):
