@@ -15,4 +15,4 @@ TICK_PER_SEC = 30
 
 RESOURCE_PATH = 'resources'
 
-DRAW_ARROWS = False
+DRAW_ARROWS = True

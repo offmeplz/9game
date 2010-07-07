@@ -112,7 +112,7 @@ class World(object):
 
     def spawn_creep(self):
         creep_pos = GAME_X_SIZE / 2, GAME_Y_SIZE - 1
-        creep = Creep(creep_pos, 3, self.field)
+        creep = Creep(creep_pos, 3, self.field, self.towers)
         self.add_creep(creep)
 
 
@@ -200,22 +200,55 @@ class Field(object):
                 if self.contains(pos) and self.empty(pos)]
 
     def _recalculate_paths(self):
-        self.dir_field = field.build_right_angle_dir_field(self, self._exit_pos)
+        self.dir_field = field.build_dir_field(self, self._exit_pos)
 
     def set_dir_field(self, dir_field):
         self.dir_field = dir_field
 
     def get_next_pos(self, pos):
+        d = self.get_direction(pos)
+        if d is None:
+            return None
+        else:
+            return self.get_direction(pos).next_vertex
+
+
+    def is_exit(self, pos):
+        return tuple(pos) in self._exit_pos
+
+    def get_direction(self, pos):
         pos = tuple(pos)
         direction = self.dir_field.get(pos, None)
         if direction is None:
             return None
         else:
-            return direction.next_vertex
+            return direction
 
-    def in_edges(self, endpos):
-        return [field.Edge(begpos, endpos, 1)
-                for begpos in self.get_neighbours(endpos)]
+    def in_edges(self, pos):
+        sq2 = sqrt(2)
+        neighbours = [
+                    ((pos[0] + 1, pos[1]), 1),
+                    ((pos[0] + 1, pos[1] + 1), sq2),
+                    ((pos[0], pos[1] + 1), 1),
+                    ((pos[0] - 1, pos[1] + 1), sq2),
+                    ((pos[0] - 1, pos[1]), 1),
+                    ((pos[0] - 1, pos[1] - 1), sq2),
+                    ((pos[0], pos[1] - 1), 1),
+                    ((pos[0] + 1, pos[1] - 1), sq2)]
+        for i,n in enumerate(neighbours):
+            if self.contains(n[0]) and self.empty(n[0]):
+                good = False
+                if i % 2 == 0:
+                    good = True
+                else:
+                    ni = neighbours[(i + 1) % len(neighbours)]
+                    pi = neighbours[(i - 1) % len(neighbours)]
+                    if self.contains(ni[0]) and self.empty(ni[0]) and\
+                       self.contains(pi[0]) and self.empty(pi[0]):
+                           good = True
+                if good:
+                    yield field.Edge(n[0], pos, n[1])
+
 
 class Game(object):
     def __init__(self):
@@ -325,7 +358,7 @@ class Game(object):
                 draw_arrow(surf, color, center, n_center)
 
     def update_panel(self):
-        self._panel_surface.fill((255, 255, 255))
+        self._panel_surface.fill((150, 150, 150))
 
 if __name__ == '__main__':
     g = Game()
