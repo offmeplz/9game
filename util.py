@@ -5,6 +5,8 @@ import math
 import os
 import pygame
 
+from pygame import Rect
+
 from cfg import *
 
 def load_image(name):
@@ -70,7 +72,7 @@ def collideline(rect, line):
     linerect = Rect(
             (min(p1[0], p2[0]), min(p1[1], p2[1])),
             (abs(p1[0] - p2[0]), abs(p1[1] - p2[1])))
-    if not rect.collide(linerect):
+    if not rect.colliderect(linerect):
         return False
 
     # Check if both half planes (formed by line) have at least one rect corner.
@@ -101,7 +103,7 @@ def anycollideline(rects, line):
             (abs(p1[0] - p2[0]), abs(p1[1] - p2[1])))
 
     for rect in rects:
-        if rect.collide(linerect):
+        if rect.colliderect(linerect):
             sides = [False, False]
             for p in (rect.topleft, rect.topright, rect.bottomleft, rect.bottomright):
                 v = (p2[0] - p1[0]) * (p[1] - p1[1]) - (p2[1] - p1[1]) * (p[0] - p1[0])
@@ -109,7 +111,7 @@ def anycollideline(rects, line):
                     sides[0] = True
                 if v <= 0:
                     sides[1] = True
-            if sides[0] and sides[1]
+            if sides[0] and sides[1]:
                 return True
     return False
 
@@ -121,7 +123,7 @@ def is_walkable(begin, end, radius, sprites):
     end = Vec(end)
     linevec = end - begin
     shift = linevec.perpendicular()
-    shift *= radius / abs(shift1)
+    shift *= radius / abs(shift)
     line1 = (begin + shift, end + shift)
     if anycollideline((s.rect for s in sprites), line1):
         return False
