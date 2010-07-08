@@ -110,7 +110,10 @@ class World(object):
 
         if pygame.sprite.spritecollideany(tower, self.creeps):
             return False
-        self.field.buildon(pos)
+        
+        buildcells = list(util.iterpoints(pos, (cls.size, cls.size)))
+        for c in buildcells:
+            self.field.buildon(c)
 
         # check if we block creeps
         block_creeps = False
@@ -123,7 +126,8 @@ class World(object):
                 block_creeps = True
                 break
         if block_creeps:
-            self.field.clearon(pos)
+            for c in buildcells:
+                self.field.clearon(c)
             raise BuildError, "Blocking"
 
         tower.add([self.towers])

@@ -218,12 +218,12 @@ class SimpleTower(GameObject, Tower):
     recharge_time = 2
     recharge_ticks = recharge_time * TICK_PER_SEC
     bullet_speed = 5
-    size = 1
+    size = 2
 
     def __init__(self, g_lefttop, creeps, missles):
         GameObject.__init__(self)
-        self.rect.center = util.game2cscreen(g_lefttop)
-        self.g_pos = Vec(g_lefttop)
+        self.rect.topleft = util.game2tlscreen(g_lefttop)
+        self.g_pos = Vec(util.screen2fgame(self.rect.center))
         self.creeps = creeps
         self.missles = missles
         self.current_recharge = 0
