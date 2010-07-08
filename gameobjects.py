@@ -139,9 +139,10 @@ class Creep(GameObject):
 
 class Wall(GameObject):
     resource_name = 'wall.png'
-    def __init__(self, g_pos):
+    size = 1
+    def __init__(self, g_lefttop):
         GameObject.__init__(self)
-        self.rect.center = util.game2cscreen(g_pos)
+        self.rect.center = util.game2cscreen(g_lefttop)
 
 class SimpleBullet(GameObject):
     radius = 2
@@ -199,10 +200,10 @@ class SimpleTower(GameObject):
     recharge_ticks = recharge_time * TICK_PER_SEC
     bullet_speed = 5
 
-    def __init__(self, g_pos, creeps, missles):
+    def __init__(self, g_lefttop, creeps, missles):
         GameObject.__init__(self)
-        self.rect.center = util.game2cscreen(g_pos)
-        self.g_pos = Vec(g_pos)
+        self.rect.center = util.game2cscreen(g_lefttop)
+        self.g_pos = Vec(g_lefttop)
         self.creeps = creeps
         self.missles = missles
         self.current_recharge = 0
