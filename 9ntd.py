@@ -64,7 +64,7 @@ class Cell(object):
 
     def setcontent(self, content):
         if content not in self.allowed:
-            raise ValueError, ''
+            raise ValueError, "set content to %s is not allowed" % content
         self.content = content
 
 
