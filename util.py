@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #vim:fileencoding=utf-8
 
+import itertools
 import math
 import os
 import pygame
@@ -132,6 +133,20 @@ def is_walkable(begin, end, radius, sprites):
         return False
     return True
 
+def placeintsegment(approxcenter, size):
+    size = int(size)
+    begin = round(approxcenter) - size / 2
+    return begin, begin + size
+
+def placeintrect(approxcenter, x_size, y_size):
+    xcorner = placeintsegment(approxcenter[0], x_size)
+    ycorner = placeintsegment(approxcenter[1], y_size)
+    return Rect(xcorner, ycorner, x_size, y_size)
+
+def iterpoints(rect):
+    return itertools.product(
+            xrange(rect.left, rect.left + rect.width),
+            xrange(rect.top, rect.top + rect.height))
 
 class Vec(object):
     __slots__ = ['x', 'y']
