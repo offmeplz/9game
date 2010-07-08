@@ -214,16 +214,6 @@ class Field(object):
         self._changed = set()
         return changed
 
-    # TODO: can remove
-    def get_neighbours(self, pos):
-        res = [ (pos[0] + 1, pos[1]),
-                (pos[0] - 1, pos[1]),
-                (pos[0], pos[1] + 1),
-                (pos[0], pos[1] - 1)]
-        return [pos
-                for pos in res
-                if self.contains(pos) and self.empty(pos)]
-
     def _recalculate_paths(self):
         self.dir_field = field.build_dir_field(self, self._exits)
 
