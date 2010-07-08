@@ -89,13 +89,14 @@ class World(object):
         creep.add([self.creeps])
 
     def build_tower(self, tower_cls, pos):
-        rect = util.placeintrect(pos, tower_cls.size, tower_cls.size)
+        sizes = (tower_cls.size, tower_cls.size)
+        topleft = util.placeintrect(pos, sizes)
         canbuild = all(
                 self.field.canbuildon(p)
-                for p in util.iterpoints(rect))
+                for p in util.iterpoints(topleft, sizes))
         
         if canbuild:
-            self.add_tower(rect.topleft, tower_cls)
+            self.add_tower(topleft, tower_cls)
         else:
             raise BuildError, "Can't build here"
 
@@ -296,9 +297,8 @@ class Game(object):
         self._restart()
         self._game_speed = 1
 
-        self._tower_sketch = pygame.surface.Surface((GAME_CELL_SIZE, GAME_CELL_SIZE)).convert_alpha()
-        self._tower_sketch_rect = Rect(-100, -100, GAME_CELL_SIZE, GAME_CELL_SIZE)
-        self._tower_sketch.fill((0,255,0,100))
+        self._tower_sketch_rect = None
+        self._tower_for_build_class = SimpleTower
 
     def _restart(self):
         self._continue_main_loop = True
@@ -324,21 +324,36 @@ class Game(object):
 
             self.world.creeps.clear(self._field_surface, self.static)
             self.world.missles.clear(self._field_surface, self.static)
-            self._field_surface.blit(self.static, self._tower_sketch_rect.topleft, self._tower_sketch_rect)
+            if self._tower_sketch_rect is not None:
+                self._field_surface.blit(self.static, self._tower_sketch_rect.topleft, self._tower_sketch_rect)
 
             self.world.update(self._game_speed)
 
             self.world.creeps.draw(self._field_surface)
             self.world.missles.draw(self._field_surface)
 
-            mpos = self._to_field_coord(pygame.mouse.get_pos())
-            if not self._tower_sketch_rect.collidepoint(mpos):
-                self._tower_sketch_rect.topleft = (mpos[0] / GAME_CELL_SIZE * GAME_CELL_SIZE), (mpos[1] / GAME_CELL_SIZE * GAME_CELL_SIZE)
-            self._field_surface.blit(self._tower_sketch, self._tower_sketch_rect.topleft)
+            self._draw_tower_sketch()
+
             pygame.display.flip()
+    
+    def _draw_tower_sketch(self):
+        tower_cls = self._tower_for_build_class
+        if tower_cls is not None:
+            mpos = self._to_field_coord(pygame.mouse.get_pos())
+            if mpos is None:
+                return
+            g_pos = util.screen2fgame(mpos)
+            g_topleft = util.placeintrect(g_pos, (tower_cls.size, ) * 2)
+            s_topleft = util.game2tlscreen(g_topleft)
+            self._tower_sketch_rect = tower_cls.draw_oksketch_on(
+                    self._field_surface, s_topleft)
 
     def _to_field_coord(self, pos):
-        return pos[0] - self._field_rect.left, pos[1] - self._field_rect.top
+        if self._field_rect.collidepoint(pos):
+            return (pos[0] - self._field_rect.left,
+                    pos[1] - self._field_rect.top)
+        else:
+            return None
 
     def _dispatch_event(self, event):
         if (event.type == QUIT) or (

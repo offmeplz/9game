@@ -164,15 +164,20 @@ def placeintsegment(approxcenter, size):
     else:
         return int(approxcenter) - size / 2
 
-def placeintrect(approxcenter, x_size, y_size):
-    xcorner = placeintsegment(approxcenter[0], x_size)
-    ycorner = placeintsegment(approxcenter[1], y_size)
-    return Rect((xcorner, ycorner), (x_size - 1, y_size - 1))
+def placeintrect(approxcenter, sizes):
+    xcorner = placeintsegment(approxcenter[0], sizes[0])
+    ycorner = placeintsegment(approxcenter[1], sizes[1])
+    return (xcorner, ycorner)
 
-def iterpoints(rect):
-    return itertools.product(
-            xrange(rect.left, rect.left + rect.width + 1),
-            xrange(rect.top, rect.top + rect.height + 1))
+def iterpoints(x, y=None):
+    if y == None:
+        rect = x
+        return itertools.product(
+                xrange(rect.left, rect.left + rect.width + 1),
+                xrange(rect.top, rect.top + rect.height + 1))
+    else:
+        return itertools.product(
+                xrange(x[0], x[0] + y[0]), xrange(x[1], x[1] + y[1]))
 
 class Vec(object):
     __slots__ = ['x', 'y']
