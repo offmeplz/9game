@@ -50,17 +50,27 @@ class NothingType(object):
 Nothing = NothingType()
 
 class Cell(object):
-    def __init__(self, content=Nothing, is_exit=False):
+    allowed = set(('empty', 'enter', 'exit', 'obstacle'))
+
+    __slots__ = ['content']
+
+    def __init__(self, content='empty'):
+        self.setcontent(content)
+
+    def isexit(self):
+        return self.content == 'exit'
+
+    def setcontent(self, content):
+        if content not in self.allowed:
+            raise ValueError, ''
         self.content = content
-        self.is_exit = is_exit
-        self.distance_to_exit = None
-        self.next_pos_to_exit = None
+
 
 class World(object):
     def __init__(self):
-        self.field = Field(GAME_X_SIZE, GAME_Y_SIZE)
-        self.field.set_exit([(GAME_X_SIZE / 2,0)])
-        self.field.set_enter((GAME_X_SIZE / 2, GAME_Y_SIZE - 1))
+        exits = [(GAME_X_SIZE / 2,0)]
+        enters =[(GAME_X_SIZE / 2, GAME_Y_SIZE - 1)]
+        self.field = Field(GAME_X_SIZE, GAME_Y_SIZE, enters, exits)
 
         self.creeps = pygame.sprite.Group()
         self.towers = pygame.sprite.Group()
@@ -83,7 +93,7 @@ class World(object):
 
         if pygame.sprite.spritecollideany(tower, self.creeps):
             return False
-        self.field.put(pos, tower)
+        self.field.buildon(pos)
         block_creeps = False
         for creep in self.creeps:
             if tuple(creep.current_cell()) not in self.field.dir_field:
@@ -115,63 +125,42 @@ class World(object):
         creep = Creep(creep_pos, 3, self.field, self.towers)
         self.add_creep(creep)
 
-
 class Field(object):
-    def __init__(self, size_x, size_y):
+    def __init__(self, size_x, size_y, enters, exits):
         self._x_size = size_x
         self._y_size = size_y
         self._field = []
         for i in xrange(size_x):
             self._field.append([Cell() for j in xrange(size_y)])
         self._changed = set()
-        self._empty_fields = size_x * size_y
-        self._exit_pos = set()
-        self._recalculate_paths()
-        self.enter = None
-
-    def set_exit(self, exit_positions):
-        for pos in self.iter_pos():
+        self._exits = set(exits)
+        for pos in self._exits:
             cell = self._get_cell(pos)
-            cell.is_exit = False
-            cell.distance_to_exit = None
-        self._exit_pos = set(exit_positions)
-        for pos in self._exit_pos:
+            cell.setcontent('exit')
+        self._enters = set(enters)
+        for pos in self._enters:
             cell = self._get_cell(pos)
-            cell.is_exit = True
+            cell.setcontent('enter')
         self._recalculate_paths()
-
-    def set_enter(self, pos):
-        if not self.contains(pos):
-            raise ValueError, "Invalid pos: %s" % str(pos)
-        self.enter = tuple(pos)
 
     def get_enter(self):
         return self.enter
 
-    def put(self, pos, obj):
-        if not self.empty(pos):
-            raise ValueError, 'Cell %s is not empty: %s' % (
-                    pos, self._at(pos))
-
-        self._set_content(pos, obj)
-        self._changed.add(pos)
-        self._empty_fields -= 1
+    def buildon(self, pos):
+        if not self.isbuildable(pos):
+            raise ValueError, "Cant build on %s. Already contains: %s" % (
+                            pos, self.get_content(pos))
+        self._get_cell(pos).content = 'obstacle'
         self._recalculate_paths()
 
     def contains(self, pos):
         return 0 <= pos[0] < self._x_size and 0 <= pos[1] < self._y_size
 
-    def clear(self, pos):
-        if self.empty(pos):
-            raise ValueError, 'Cell %s is already emply' % pos
-        self._set_content(pos, Nothing)
-        self._changed.add(pos)
-        self._empty_fields += 1
-        self._recalculate_paths()
+    def ismovable(self, pos):
+        return self.get_content(pos) != 'obstacle'
 
-    def empty(self, pos):
-        return self.get_content(pos) is Nothing and\
-               tuple(pos) not in self._exit_pos
+    def isbuildable(self, *pos):
+        return all(self.get_content(p) == 'empty' for p in pos)
 
     def _get_cell(self, pos):
         return self._field[pos[0]][pos[1]]
@@ -200,7 +189,7 @@ class Field(object):
                 if self.contains(pos) and self.empty(pos)]
 
     def _recalculate_paths(self):
-        self.dir_field = field.build_dir_field(self, self._exit_pos)
+        self.dir_field = field.build_dir_field(self, self._exits)
 
     def set_dir_field(self, dir_field):
         self.dir_field = dir_field
@@ -211,10 +200,6 @@ class Field(object):
             return None
         else:
             return self.get_direction(pos).next_vertex
-
-
-    def is_exit(self, pos):
-        return tuple(pos) in self._exit_pos
 
     def get_direction(self, pos):
         pos = tuple(pos)
@@ -236,15 +221,15 @@ class Field(object):
                     ((pos[0], pos[1] - 1), 1),
                     ((pos[0] + 1, pos[1] - 1), sq2)]
         for i,n in enumerate(neighbours):
-            if self.contains(n[0]) and self.empty(n[0]):
+            if self.contains(n[0]) and self.ismovable(n[0]):
                 good = False
                 if i % 2 == 0:
                     good = True
                 else:
                     ni = neighbours[(i + 1) % len(neighbours)]
                     pi = neighbours[(i - 1) % len(neighbours)]
-                    if self.contains(ni[0]) and self.empty(ni[0]) and\
-                       self.contains(pi[0]) and self.empty(pi[0]):
+                    if self.contains(ni[0]) and self.ismovable(ni[0]) and\
+                       self.contains(pi[0]) and self.ismovable(pi[0]):
                            good = True
                 if good:
                     yield field.Edge(n[0], pos, n[1])
@@ -324,8 +309,7 @@ class Game(object):
                 pos = Vec(event.pos) - Vec(self._field_rect.topleft)
                 if event.button == 1:
                     game_pos = util.screen2game(pos)
-                    if self.world.field.empty(game_pos) and\
-                            tuple(game_pos) != self.world.field.enter:
+                    if self.world.field.isbuildable(game_pos):
                         self.world.add_tower(game_pos, SimpleTower)
                         self.update_static_layer()
                         pygame.display.flip()

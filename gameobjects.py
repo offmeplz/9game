@@ -52,7 +52,7 @@ class Creep(GameObject):
         cell_pos = self.current_cell()
         cur_cell = self.field._get_cell(cell_pos)
         if self.curdst is None:
-            if cur_cell.is_exit:
+            if cur_cell.isexit():
                 self.finish()
                 return
             dst = self._find_next_dst()
