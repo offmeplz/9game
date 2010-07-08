@@ -73,8 +73,8 @@ class Cell(object):
 
 class World(object):
     def __init__(self):
-        exits = [(GAME_X_SIZE / 2,0)]
-        enters =[(GAME_X_SIZE / 2, GAME_Y_SIZE - 1)]
+        enters =[(0, i) for i in xrange(GAME_Y_SIZE)]
+        exits = [(GAME_X_SIZE - 1, i) for i in xrange(GAME_Y_SIZE)]
         self.field = Field(GAME_X_SIZE, GAME_Y_SIZE, enters, exits)
 
         self.creeps = pygame.sprite.Group()
