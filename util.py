@@ -64,15 +64,6 @@ def screen2gamecellrect(s_rect):
     g_rect.heght /= GAME_CELL_SIZE
     return g_rect
 
-def addvec(pos1, pos2):
-    return pos1[0] + pos2[0], pos1[1] + pos2[1]
- 
-def mulvec(pos, x):
-    return pos[0] * x, pos[1] * x
-
-def divvec(pos, x):
-    return pos[0] / x, pos[1] / x
-
 def signum(num):
     if num > 0:
         return 1
