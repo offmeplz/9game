@@ -147,7 +147,7 @@ class Field(object):
         return self.enter
 
     def buildon(self, pos):
-        if not self.isbuildable(pos):
+        if not self.canbuildon(pos):
             raise ValueError, "Cant build on %s. Already contains: %s" % (
                             pos, self.get_content(pos))
         self._get_cell(pos).content = 'obstacle'
@@ -156,10 +156,10 @@ class Field(object):
     def contains(self, pos):
         return 0 <= pos[0] < self._x_size and 0 <= pos[1] < self._y_size
 
-    def ismovable(self, pos):
+    def canmoveon(self, pos):
         return self.get_content(pos) != 'obstacle'
 
-    def isbuildable(self, *pos):
+    def canbuildon(self, *pos):
         return all(self.get_content(p) == 'empty' for p in pos)
 
     def _get_cell(self, pos):
@@ -221,15 +221,15 @@ class Field(object):
                     ((pos[0], pos[1] - 1), 1),
                     ((pos[0] + 1, pos[1] - 1), sq2)]
         for i,n in enumerate(neighbours):
-            if self.contains(n[0]) and self.ismovable(n[0]):
+            if self.contains(n[0]) and self.canmoveon(n[0]):
                 good = False
                 if i % 2 == 0:
                     good = True
                 else:
                     ni = neighbours[(i + 1) % len(neighbours)]
                     pi = neighbours[(i - 1) % len(neighbours)]
-                    if self.contains(ni[0]) and self.ismovable(ni[0]) and\
-                       self.contains(pi[0]) and self.ismovable(pi[0]):
+                    if self.contains(ni[0]) and self.canmoveon(ni[0]) and\
+                       self.contains(pi[0]) and self.canmoveon(pi[0]):
                            good = True
                 if good:
                     yield field.Edge(n[0], pos, n[1])
@@ -265,6 +265,10 @@ class Game(object):
         self._restart()
         self._game_speed = 1
 
+        self._tower_sketch = pygame.surface.Surface((GAME_CELL_SIZE, GAME_CELL_SIZE)).convert_alpha()
+        self._tower_sketch_rect = Rect(-100, -100, GAME_CELL_SIZE, GAME_CELL_SIZE)
+        self._tower_sketch.fill((0,255,0,100))
+
     def _restart(self):
         self._continue_main_loop = True
         self._clock = pygame.time.Clock()
@@ -289,10 +293,19 @@ class Game(object):
 
             self.world.creeps.clear(self._field_surface, self.static)
             self.world.missles.clear(self._field_surface, self.static)
+            self._field_surface.blit(self.static, self._tower_sketch_rect.topleft, self._tower_sketch_rect)
 
             self.world.update(self._game_speed)
             self.world.draw(self._field_surface)
+            mpos = self._to_field_coord(pygame.mouse.get_pos())
+            if not self._tower_sketch_rect.collidepoint(mpos):
+                self._tower_sketch_rect.topleft = (mpos[0] / GAME_CELL_SIZE * GAME_CELL_SIZE), (mpos[1] / GAME_CELL_SIZE * GAME_CELL_SIZE)
+            self._field_surface.blit(self._tower_sketch, self._tower_sketch_rect.topleft)
             pygame.display.flip()
+
+    def _to_field_coord(self, pos):
+        return pos[0] - self._field_rect.left, pos[1] - self._field_rect.top
+
 
     def _dispatch_event(self, event):
         if (event.type == QUIT) or (
@@ -306,10 +319,10 @@ class Game(object):
                 self._game_speed = 1
         elif event.type == MOUSEBUTTONDOWN:
             if self._field_rect.collidepoint(event.pos):
-                pos = Vec(event.pos) - Vec(self._field_rect.topleft)
+                pos = self._to_field_coord(event.pos)
                 if event.button == 1:
                     game_pos = util.screen2game(pos)
-                    if self.world.field.isbuildable(game_pos):
+                    if self.world.field.canbuildon(game_pos):
                         self.world.add_tower(game_pos, SimpleTower)
                         self.update_static_layer()
                         pygame.display.flip()
