@@ -2,8 +2,8 @@
 #vim:fileencoding=utf-8
 
 # Field sizes (in game cells).
-GAME_X_SIZE = 33
-GAME_Y_SIZE = 22
+GAME_X_SIZE = 22
+GAME_Y_SIZE = 11
 
 # Size in pixels of one game cell.
 GAME_CELL_SIZE = 24
