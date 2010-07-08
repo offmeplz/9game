@@ -18,6 +18,7 @@ from cfg import *
 def norm(vec):
     return sqrt(vec[0] ** 2 + vec[1] ** 2)
 
+# TODO: use Vec class
 def draw_arrow(surface, color, begin, end):
     if begin == end:
         raise ValueError, "Begin and End are the same"
@@ -37,6 +38,7 @@ def draw_arrow(surface, color, begin, end):
     pygame.draw.aaline(surface, color, end, side_end2)
 
 
+# TODO: remove Nothing and NothingType
 class NothingType(object):
     obj = None
     def __new__(cls, *args, **kwargs):
