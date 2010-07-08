@@ -15,6 +15,9 @@ import field
 from gameobjects import Creep, Wall, SimpleBullet, SimpleTower
 from cfg import *
 
+class BlockingError(Exception):
+    pass
+
 def norm(vec):
     return sqrt(vec[0] ** 2 + vec[1] ** 2)
 
@@ -85,6 +88,16 @@ class World(object):
     def add_creep(self, creep):
         creep.add([self.creeps])
 
+    def build_tower(self, tower_cls, pos):
+        rect = util.placeintrect(pos, tower_cls.size, tower_cls.size)
+        canbuild = all(
+                self.field.canbuildon(p)
+                for p in util.iterpoints(rect))
+        if canbuild:
+            self.add_tower(rect.topleft, tower_cls)
+        else:
+            raise BlockingError, "Can't build here"
+
     def add_tower(self, pos, cls):
         if cls is Wall:
             tower = cls(pos)
@@ -96,14 +109,21 @@ class World(object):
         if pygame.sprite.spritecollideany(tower, self.creeps):
             return False
         self.field.buildon(pos)
+
+        # check if we block creeps
         block_creeps = False
         for creep in self.creeps:
             if tuple(creep.current_cell()) not in self.field.dir_field:
                 block_creeps = True
                 break
+        for e in self.field._enters:
+            if e not in self.field.dir_field:
+                block_creeps = True
+                break
         if block_creeps:
-            self.field.clear(pos)
-            return
+            self.field.clearon(pos)
+            raise BlockingError, "Blocking"
+
         tower.add([self.towers])
         for creep in self.creeps:
             creep.forget_way()
@@ -155,14 +175,21 @@ class Field(object):
         self._get_cell(pos).content = 'obstacle'
         self._recalculate_paths()
 
+    def clearon(self, pos):
+        cell = self._get_cell(pos)
+        if cell.content != 'obstacle':
+            raise ValueError, "Can't clear on %s. Content is not obstacle" % pos
+        cell.content = 'empty'
+        self._recalculate_paths()
+
     def contains(self, pos):
         return 0 <= pos[0] < self._x_size and 0 <= pos[1] < self._y_size
 
     def canmoveon(self, pos):
         return self.get_content(pos) != 'obstacle'
 
-    def canbuildon(self, *pos):
-        return all(self.get_content(p) == 'empty' for p in pos)
+    def canbuildon(self, pos):
+        return self.get_content(pos)
 
     def _get_cell(self, pos):
         return self._field[pos[0]][pos[1]]
@@ -181,6 +208,7 @@ class Field(object):
         self._changed = set()
         return changed
 
+    # TODO: can remove
     def get_neighbours(self, pos):
         res = [ (pos[0] + 1, pos[1]),
                 (pos[0] - 1, pos[1]),
@@ -325,11 +353,13 @@ class Game(object):
             if self._field_rect.collidepoint(event.pos):
                 pos = self._to_field_coord(event.pos)
                 if event.button == 1:
-                    game_pos = util.screen2game(pos)
-                    if self.world.field.canbuildon(game_pos):
-                        self.world.add_tower(game_pos, SimpleTower)
+                    game_pos = util.screen2fgame(pos)
+                    try:
+                        self.world.build_tower(SimpleTower, game_pos)
                         self.update_static_layer()
-                        pygame.display.flip()
+                    except BlockingError, e:
+                        # TODO: Show message to player.
+                        pass
                 elif event.button == 2:
                     for creep in self.world.creeps:
                         b = SimpleBullet(util.screen2fgame(pos), creep, 1, 20)
