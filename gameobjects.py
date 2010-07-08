@@ -28,7 +28,7 @@ class GameObject(pygame.sprite.Sprite):
 
 class Creep(GameObject):
     resource_name = 'creep.png'
-    speed = 1.
+    speed = 2.
     
     def __init__(self, g_pos, health, field, towers):
         GameObject.__init__(self)
