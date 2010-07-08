@@ -149,7 +149,7 @@ class World(object):
         self.missles.draw(surface)
 
     def spawn_creep(self):
-        creep_pos = GAME_X_SIZE / 2, GAME_Y_SIZE - 1
+        creep_pos = random.choice(list(self.field._enters))
         creep = Creep(creep_pos, 3, self.field, self.towers)
         self.add_creep(creep)
 
