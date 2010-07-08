@@ -159,18 +159,20 @@ def is_walkable(begin, end, radius, sprites):
 
 def placeintsegment(approxcenter, size):
     size = int(size)
-    begin = round(approxcenter) - size / 2
-    return begin, begin + size
+    if size % 2 == 0:
+        return int(round(approxcenter)) - size / 2
+    else:
+        return int(approxcenter) - size / 2
 
 def placeintrect(approxcenter, x_size, y_size):
     xcorner = placeintsegment(approxcenter[0], x_size)
     ycorner = placeintsegment(approxcenter[1], y_size)
-    return Rect(xcorner, ycorner, x_size, y_size)
+    return Rect((xcorner, ycorner), (x_size - 1, y_size - 1))
 
 def iterpoints(rect):
     return itertools.product(
-            xrange(rect.left, rect.left + rect.width),
-            xrange(rect.top, rect.top + rect.height))
+            xrange(rect.left, rect.left + rect.width + 1),
+            xrange(rect.top, rect.top + rect.height + 1))
 
 class Vec(object):
     __slots__ = ['x', 'y']
