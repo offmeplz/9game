@@ -137,7 +137,22 @@ class Creep(GameObject):
         if self.health <= 0:
             self.kill()
 
-class Wall(GameObject):
+class Tower(object):
+    def get_oksketch(self):
+        if not hasattr(self, 'sketch'):
+            sketch_size = GAME_CELL_SIZE * self.size
+            self.sketch = pygame.surface.Surface((sketch_size, sketch_size))
+            self._tower_sketch.fill((0,255,0,100))
+        return self.sketch
+
+    def draw_oksketch_on(self, surface, s_towerlefttop):
+        '''
+        Returns updated rectangle.
+        '''
+        return surface.blit(self.get_oksketch(), s_towerlefttop)
+
+
+class Wall(GameObject, Tower):
     resource_name = 'wall.png'
     size = 1
     def __init__(self, g_lefttop):
@@ -191,14 +206,16 @@ class SimpleBullet(GameObject):
         self.target = None
         
 
-class SimpleTower(GameObject):
+class SimpleTower(GameObject, Tower):
     resource_name = 'simpletower.png'
+
     damage = 1
     radius = 3
     sqradius = radius ** 2
     recharge_time = 2
     recharge_ticks = recharge_time * TICK_PER_SEC
     bullet_speed = 5
+    size = 1
 
     def __init__(self, g_lefttop, creeps, missles):
         GameObject.__init__(self)
