@@ -134,6 +134,7 @@ def is_walkable(begin, end, radius, sprites):
 
 
 class Vec(object):
+    __slots__ = ['x', 'y']
     def __init__(self, x, y=None):
         if y is None:
             if isinstance(x, Vec):

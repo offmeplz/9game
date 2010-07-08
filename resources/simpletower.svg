@@ -66,8 +66,24 @@
        height="254.00781"
        x="0.99609387"
        y="797.35828"
-       inkscape:export-xdpi="11.25"
-       inkscape:export-ydpi="11.25"
+       inkscape:export-xdpi="5.625"
+       inkscape:export-ydpi="5.625"
        inkscape:export-filename="/home/ermolovd/workspace/9game/resources/wall.png" />
+    <path
+       sodipodi:type="star"
+       style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:2;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
+       id="path3600"
+       sodipodi:sides="3"
+       sodipodi:cx="82.832512"
+       sodipodi:cy="867.50427"
+       sodipodi:r1="73.68576"
+       sodipodi:r2="36.84288"
+       sodipodi:arg1="0.58039819"
+       sodipodi:arg2="1.6275957"
+       inkscape:flatsided="true"
+       inkscape:rounded="0"
+       inkscape:randomized="0"
+       d="M 144.45181,907.91037 17.030152,900.6651 87.01557,793.93734 144.45181,907.91037 z"
+       transform="matrix(0.98474941,-0.06407685,0.05550793,1.1367681,-1.7047737,-35.525095)" />
   </g>
 </svg>
