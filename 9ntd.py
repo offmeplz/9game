@@ -238,7 +238,7 @@ class Field(object):
 class Game(object):
     def __init__(self):
         pygame.init()
-        pygame.display.set_caption('9nMaze')
+        pygame.display.set_caption('9nTd')
         field_x_size = GAME_X_SIZE * GAME_CELL_SIZE
         field_y_size = GAME_Y_SIZE * GAME_CELL_SIZE
 
