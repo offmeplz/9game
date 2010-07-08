@@ -190,7 +190,7 @@ class Field(object):
         return self.get_content(pos) != 'obstacle'
 
     def canbuildon(self, pos):
-        return self.get_content(pos)
+        return self.get_content(pos) == 'empty'
 
     def _get_cell(self, pos):
         return self._field[pos[0]][pos[1]]
