@@ -298,7 +298,10 @@ class Game(object):
             self._field_surface.blit(self.static, self._tower_sketch_rect.topleft, self._tower_sketch_rect)
 
             self.world.update(self._game_speed)
-            self.world.draw(self._field_surface)
+
+            self.world.creeps.draw(self._field_surface)
+            self.world.missles.draw(self._field_surface)
+
             mpos = self._to_field_coord(pygame.mouse.get_pos())
             if not self._tower_sketch_rect.collidepoint(mpos):
                 self._tower_sketch_rect.topleft = (mpos[0] / GAME_CELL_SIZE * GAME_CELL_SIZE), (mpos[1] / GAME_CELL_SIZE * GAME_CELL_SIZE)
@@ -307,7 +310,6 @@ class Game(object):
 
     def _to_field_coord(self, pos):
         return pos[0] - self._field_rect.left, pos[1] - self._field_rect.top
-
 
     def _dispatch_event(self, event):
         if (event.type == QUIT) or (
