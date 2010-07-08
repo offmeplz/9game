@@ -15,7 +15,7 @@ import field
 from gameobjects import Creep, Wall, SimpleBullet, SimpleTower
 from cfg import *
 
-class BlockingError(Exception):
+class BuildError(Exception):
     pass
 
 def norm(vec):
@@ -93,10 +93,11 @@ class World(object):
         canbuild = all(
                 self.field.canbuildon(p)
                 for p in util.iterpoints(rect))
+        
         if canbuild:
             self.add_tower(rect.topleft, tower_cls)
         else:
-            raise BlockingError, "Can't build here"
+            raise BuildError, "Can't build here"
 
     def add_tower(self, pos, cls):
         if cls is Wall:
@@ -122,7 +123,7 @@ class World(object):
                 break
         if block_creeps:
             self.field.clearon(pos)
-            raise BlockingError, "Blocking"
+            raise BuildError, "Blocking"
 
         tower.add([self.towers])
         for creep in self.creeps:
@@ -357,7 +358,7 @@ class Game(object):
                     try:
                         self.world.build_tower(SimpleTower, game_pos)
                         self.update_static_layer()
-                    except BlockingError, e:
+                    except BuildError, e:
                         # TODO: Show message to player.
                         pass
                 elif event.button == 2:
