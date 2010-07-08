@@ -35,10 +35,34 @@ def game2screen(game_pos):
     s_x, s_y = g_x * GAME_CELL_SIZE, g_y * GAME_CELL_SIZE
     return int(s_x), int(s_y)
 
+game2tlscreen = game2screen
+
 def game2cscreen(game_pos):
     screen = game2screen(game_pos)
     return (int(screen[0] + GAME_CELL_SIZE / 2),
             int(screen[1] + GAME_CELL_SIZE / 2))
+
+def game2screencellrect(g_rect):
+    s_rect = g_rect.copy()
+    s_rect.top *= GAME_CELL_SIZE
+    s_rect.left *= GAME_CELL_SIZE
+    s_rect.width *= GAME_CELL_SIZE
+    s_rect.heght *= GAME_CELL_SIZE
+    return s_rect
+
+def screen2gamecellrect(s_rect):
+    if s_rect.top % GAME_CELL_SIZE or \
+       s_rect.left % GAME_CELL_SIZE or \
+       s_rect.width % GAME_CELL_SIZE or \
+       s_rect.height % GAME_CELL_SIZE:
+           raise ValueError, "Rect %s is not cellrect" % s_rect
+
+    g_rect = s_rect.copy()
+    g_rect.top /= GAME_CELL_SIZE
+    g_rect.left /= GAME_CELL_SIZE
+    g_rect.width /= GAME_CELL_SIZE
+    g_rect.heght /= GAME_CELL_SIZE
+    return g_rect
 
 def addvec(pos1, pos2):
     return pos1[0] + pos2[0], pos1[1] + pos2[1]
