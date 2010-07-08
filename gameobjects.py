@@ -144,7 +144,7 @@ class Wall(GameObject):
         self.rect.center = util.game2cscreen(g_pos)
 
 class SimpleBullet(GameObject):
-    radius = 3
+    radius = 2
     image = None
     rect = None
 
