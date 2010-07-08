@@ -364,7 +364,11 @@ class Game(object):
                 event.type == KEYDOWN and event.key == K_ESCAPE):
             self._exit()
         elif event.type == KEYDOWN:
-            if event.key == K_SPACE:
+            if event.key == K_w:
+                self._tower_for_build_class = Wall
+            elif event.key == K_s:
+                self._tower_for_build_class = SimpleTower
+            elif event.key == K_SPACE:
                 self._game_speed = 4
         elif event.type == KEYUP:
             if event.key == K_SPACE:
@@ -375,7 +379,7 @@ class Game(object):
                 if event.button == 1:
                     game_pos = util.screen2fgame(pos)
                     try:
-                        self.world.build_tower(SimpleTower, game_pos)
+                        self.world.build_tower(self._tower_for_build_class, game_pos)
                         self.update_static_layer()
                     except BuildError, e:
                         # TODO: Show message to player.
