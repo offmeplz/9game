@@ -138,18 +138,21 @@ class Creep(GameObject):
             self.kill()
 
 class Tower(object):
-    def get_oksketch(self):
-        if not hasattr(self, 'sketch'):
-            sketch_size = GAME_CELL_SIZE * self.size
-            self.sketch = pygame.surface.Surface((sketch_size, sketch_size))
-            self._tower_sketch.fill((0,255,0,100))
-        return self.sketch
+    @classmethod
+    def get_oksketch(cls):
+        if not hasattr(cls, 'sketch'):
+            sketch_size = GAME_CELL_SIZE * cls.size
+            cls.sketch = pygame.surface.Surface((sketch_size, sketch_size)).convert_alpha()
+            cls.sketch.fill((0,255,0,100))
+        return cls.sketch
 
-    def draw_oksketch_on(self, surface, s_towerlefttop):
+    
+    @classmethod
+    def draw_oksketch_on(cls, surface, s_towerlefttop):
         '''
         Returns updated rectangle.
         '''
-        return surface.blit(self.get_oksketch(), s_towerlefttop)
+        return surface.blit(cls.get_oksketch(), s_towerlefttop)
 
 
 class Wall(GameObject, Tower):
