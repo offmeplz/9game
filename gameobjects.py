@@ -175,7 +175,7 @@ class SimpleBullet(GameObject):
             cls.image.fill(pygame.Color(255, 255, 255, 0))
             cls.rect = cls.image.get_rect()
             pygame.draw.circle(cls.image, (0,0,0), cls.rect.center, cls.radius)
-        return cls.image, cls.rect
+        return cls.image, cls.rect.copy()
 
     def __init__(self, g_pos, target, damage, speed):
         GameObject.__init__(self)
@@ -183,7 +183,6 @@ class SimpleBullet(GameObject):
         self.target = target
         self.damage = damage
         self.speed = speed
-        rect_size = self.radius * 2 - 1
         self.rect.center = util.game2cscreen(g_pos)
 
     def update(self, ticks):

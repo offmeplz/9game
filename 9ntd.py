@@ -379,7 +379,7 @@ class Game(object):
                 elif event.button == 2:
                     for creep in self.world.creeps:
                         b = SimpleBullet(util.screen2fgame(pos), creep, 1, 20)
-                        b.add([self.world.missles])
+                        self.world.missles.add(b)
                         break
 
     def _exit(self):
