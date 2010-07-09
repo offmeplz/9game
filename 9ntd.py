@@ -41,19 +41,6 @@ def draw_arrow(surface, color, begin, end):
     pygame.draw.aaline(surface, color, end, side_end2)
 
 
-# TODO: remove Nothing and NothingType
-class NothingType(object):
-    obj = None
-    def __new__(cls, *args, **kwargs):
-        if cls.obj is None:
-            cls.obj = object.__new__(cls, *args, **kwargs)
-        return cls.obj
-
-    def color(self):
-        return (255,255,255)
-
-Nothing = NothingType()
-
 class Cell(object):
     allowed = set(('empty', 'enter', 'exit', 'obstacle'))
 
