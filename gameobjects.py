@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #vim:fileencoding=utf-8
 
+import collections
 import pygame
 
 import util
@@ -25,6 +26,31 @@ class GameObject(pygame.sprite.Sprite):
     def update(self, ticks):
         pass
 
+class Starter(object):
+    @staticmethod
+    def defaultcallback(arg):
+        raise NotImplementedError, "Callback is not set."
+
+    def __init__(self, iargs, func):
+        self.iargs = iter(iargs)
+        try:
+            self.nexttime, self.arg = next(self.iargs)
+        except StopIteration:
+            self.nexttime, self.arg = None, None
+
+        if func is None:
+            func = Starter.defaultcallback
+        self.func = func
+        self.curtime = 0
+
+    def update(self, ticks):
+        self.curtime += float(ticks) / TICK_PER_SEC
+        while self.nexttime is not None and self.curtime > self.nexttime:
+            self.func(self.arg)
+            try:
+                self.nexttime, self.arg = next(self.iargs)
+            except StopIteration:
+                self.nexttime, self.arg = None, None
 
 class Creep(GameObject):
     resource_name = 'creep.png'

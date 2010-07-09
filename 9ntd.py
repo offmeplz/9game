@@ -2,7 +2,7 @@
 #vim:fileencoding=utf-8
 
 from collections import deque
-from itertools import product
+from itertools import product, count
 import random
 from math import sqrt
 
@@ -12,8 +12,9 @@ from pygame.locals import *
 import util
 from util import Vec
 import field
-from gameobjects import Creep, Wall, SimpleBullet, SimpleTower
+from gameobjects import Creep, Wall, SimpleBullet, SimpleTower, Starter
 from cfg import *
+import testlevel
 
 class BuildError(Exception):
     pass
@@ -68,9 +69,9 @@ class World(object):
         self.towers = pygame.sprite.Group()
         self.missles = pygame.sprite.Group()
 
-        self.next_spawn = 0
-        self.time = 0
-        self.spawn_period = 2 * TICK_PER_SEC
+        self.creepwave = Starter(
+                testlevel.CREEP_WAVES[0]['creeps'],
+                self.spawn_creep)
 
     def add_creep(self, creep):
         creep.add([self.creeps])
@@ -120,10 +121,7 @@ class World(object):
             creep.forget_way()
 
     def update(self, ticks):
-        self.time += ticks
-        if self.time > self.next_spawn:
-            self.spawn_creep()
-            self.next_spawn += self.spawn_period
+        self.creepwave.update(ticks)
 
         self.towers.update(ticks)
         self.creeps.update(ticks)
@@ -133,9 +131,10 @@ class World(object):
         self.creeps.draw(surface)
         self.missles.draw(surface)
 
-    def spawn_creep(self):
+    def spawn_creep(self, creep=None):
+        if creep is None:
+            creep = Creep(health=3, speed=2)
         creep_pos = random.choice(list(self.field._enters))
-        creep = Creep(health=3, speed=2)
         creep.place(creep_pos, self.field)
         self.add_creep(creep)
 
