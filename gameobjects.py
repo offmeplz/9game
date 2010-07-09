@@ -29,24 +29,29 @@ class GameObject(pygame.sprite.Sprite):
 class Creep(GameObject):
     resource_name = 'creep.png'
     speed = 2.
+    health = 3
     
-    def __init__(self, g_pos, health, field, towers):
+    def __init__(self, health=None, speed=None):
         GameObject.__init__(self)
-
-        self.g_pos = Vec(float(g_pos[0]), float(g_pos[1]))
-        self.field = field
-        self.rect.center = util.game2cscreen(g_pos)
-        self.curdst = None
         self.direction = Vec(0,1)
-        self.health = health
+        if health is not None:
+            self.health = health
+        else:
+            self.health = Creep.health
+
         self.maxhealth = health
-        self.towers = towers
 
     @classmethod
     def get_img_rect(cls):
         if cls.img is None:
             cls.img, cls.img_rect = util.load_image(cls.resource_name)
         return cls.img, cls.img_rect.copy()
+
+    def place(self, g_pos, field):
+        self.g_pos = Vec(g_pos)
+        self.field = field
+        self.rect.center = util.game2cscreen(self.g_pos)
+        self.curdst = None
 
     def update(self, ticks):
         cell_pos = self.current_cell()

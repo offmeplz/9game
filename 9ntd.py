@@ -148,7 +148,8 @@ class World(object):
 
     def spawn_creep(self):
         creep_pos = random.choice(list(self.field._enters))
-        creep = Creep(creep_pos, 3, self.field, self.towers)
+        creep = Creep(health=3, speed=2)
+        creep.place(creep_pos, self.field)
         self.add_creep(creep)
 
 class Field(object):
