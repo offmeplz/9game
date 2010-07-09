@@ -112,8 +112,7 @@ class World(object):
             return False
         
         buildcells = list(util.iterpoints(pos, (cls.size, cls.size)))
-        for c in buildcells:
-            self.field.buildon(c)
+        self.field.buildon(*buildcells)
 
         # check if we block creeps
         block_creeps = False
@@ -126,8 +125,7 @@ class World(object):
                 block_creeps = True
                 break
         if block_creeps:
-            for c in buildcells:
-                self.field.clearon(c)
+            self.field.clearon(*buildcells)
             raise BuildError, "Blocking"
 
         tower.add([self.towers])
@@ -174,18 +172,22 @@ class Field(object):
     def get_enter(self):
         return self.enter
 
-    def buildon(self, pos):
-        if not self.canbuildon(pos):
-            raise ValueError, "Cant build on %s. Already contains: %s" % (
-                            pos, self.get_content(pos))
-        self._get_cell(pos).content = 'obstacle'
+    def buildon(self, *pos):
+        for p in pos:
+            if not self.canbuildon(p):
+                raise ValueError,\
+                        "Cant build on %s. Already contains: %s" % (
+                            p, self.get_content(p))
+        for p in pos:
+            self._get_cell(p).content = 'obstacle'
         self._recalculate_paths()
 
-    def clearon(self, pos):
-        cell = self._get_cell(pos)
-        if cell.content != 'obstacle':
-            raise ValueError, "Can't clear on %s. Content is not obstacle" % pos
-        cell.content = 'empty'
+    def clearon(self, *pos):
+        for p in pos:
+            if self._get_cell(p).content != 'obstacle':
+                raise ValueError, "Can't clear on %s. Content is not obstacle" % p
+        for p in pos:
+            self._get_cell(p).content = 'empty'
         self._recalculate_paths()
 
     def contains(self, pos):
