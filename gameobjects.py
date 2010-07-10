@@ -2,6 +2,7 @@
 #vim:fileencoding=utf-8
 
 import collections
+import random
 import pygame
 
 import util
@@ -32,6 +33,8 @@ class Blood(GameObject):
     def __init__(self, obj):
         GameObject.__init__(self)
         self.rect.center = obj.rect.center
+        angle = random.choice([0, 90, 180, 270])
+        self.image = pygame.transform.rotate(self.image, angle)
 
 class Message(pygame.sprite.Sprite):
     speed = 1.
