@@ -1,19 +1,22 @@
 #!/usr/bin/env python
 #vim:fileencoding=utf-8
 
+import random
+
 from collections import deque
 from itertools import product, count
-import random
 from math import sqrt
 
 import pygame
 from pygame.locals import *
 
-import util
-from util import Vec
 import field
-from gameobjects import Creep, Wall, SimpleBullet, SimpleTower, Starter
+import interface
+import util
 from cfg import *
+from gameobjects import Creep, Wall, SimpleBullet, SimpleTower, Starter
+from util import Vec
+
 import testlevel
 
 class BuildError(Exception):
@@ -271,17 +274,25 @@ class Game(object):
         field_rect = Rect((0,top_panel_y_size), (field_x_size, field_y_size))
         self._field_rect = field_rect
         self._field_surface = self._screen.subsurface(field_rect)
-
-        panel_rect = Rect((0, top_panel_y_size + field_y_size), (panel_x_size, panel_y_size))
-        self._panel_surface = self._screen.subsurface(panel_rect)
-
-        top_panel_rect = Rect((0,0), (top_panel_x_size, top_panel_y_size))
-        self._top_panel_surface = self._screen.subsurface(top_panel_rect)
-        self._restart()
         self._game_speed = 1
 
         self._tower_sketch_rect = None
         self._tower_for_build_class = SimpleTower
+
+        panel_rect = Rect((0, top_panel_y_size + field_y_size), (panel_x_size, panel_y_size))
+        self._panel = interface.PanelHolder(self._screen, panel_rect)
+
+        top_panel_rect = Rect((0,0), (top_panel_x_size, top_panel_y_size))
+        self._top_panel = interface.PanelHolder(self._screen, top_panel_rect)
+
+        menu_rect = Rect((0, 0), (top_panel_x_size / 5, top_panel_y_size))
+        self.menu_button = interface.MenuButton(
+                self._top_panel.surface, menu_rect)
+
+        self._top_panel.addsubpanel(self.menu_button, menu_rect)
+
+        self._restart()
+
 
     def _restart(self):
         self._continue_main_loop = True
@@ -368,6 +379,11 @@ class Game(object):
                         b = SimpleBullet(util.screen2fgame(pos), creep, 1, 20)
                         self.world.missles.add(b)
                         break
+            elif self._top_panel.rect.collidepoint(event.pos):
+                self._top_panel.onclick(event.pos, event.button)
+        elif event.type == MOUSEBUTTONUP:
+            if self._top_panel.rect.collidepoint(event.pos):
+                self._top_panel.onrelease(event.pos, event.button)
 
     def _exit(self):
         self._state = 'EXIT'
@@ -400,8 +416,9 @@ class Game(object):
                 draw_arrow(surf, color, center, n_center)
 
     def update_panel(self):
-        self._panel_surface.fill((150, 150, 150))
-        self._top_panel_surface.fill((150, 150, 150))
+        self._panel.surface.fill((150, 150, 150))
+        self._top_panel.surface.fill((150, 150, 150))
+        self.menu_button.redraw()
 
 if __name__ == '__main__':
     g = Game()
