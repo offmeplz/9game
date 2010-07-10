@@ -76,8 +76,13 @@ class World(object):
                 testlevel.CREEP_WAVES[0]['creeps'],
                 self.spawn_creep)
 
+        self.money = testlevel.INIT_MONEY
+
     def add_creep(self, creep):
         creep.add([self.creeps])
+
+    def get_money(self):
+        return self.money
 
     def build_tower(self, tower_cls, pos):
         sizes = (tower_cls.size, tower_cls.size)
@@ -271,6 +276,9 @@ class Game(object):
         
         window = pygame.display.set_mode((window_x_size, window_y_size))
         self._screen = pygame.display.get_surface()
+
+        self.world = World()
+
         field_rect = Rect((0,top_panel_y_size), (field_x_size, field_y_size))
         self._field_rect = field_rect
         self._field_surface = self._screen.subsurface(field_rect)
@@ -289,7 +297,12 @@ class Game(object):
         self.menu_button = interface.MenuButton(
                 self._top_panel.surface, menu_rect)
 
+        money_rect = Rect((top_panel_x_size * 4 / 5, 0), (top_panel_x_size / 5, top_panel_y_size))
+        money_info = interface.MoneyInfo(
+                self._top_panel.surface, money_rect, self.world.get_money)
+
         self._top_panel.addsubpanel(self.menu_button, menu_rect)
+        self._top_panel.addsubpanel(money_info, menu_rect)
 
         self._restart()
 
@@ -298,7 +311,6 @@ class Game(object):
         self._continue_main_loop = True
         self._clock = pygame.time.Clock()
         self._state = 'PLAY'
-        self.world = World()
         self.background = pygame.Surface(self._field_surface.get_size()).convert()
         color = (255,255,255)
         self.background.fill(color)
@@ -327,6 +339,8 @@ class Game(object):
             self.world.missles.draw(self._field_surface)
 
             self._draw_tower_sketch()
+
+            self._top_panel.update()
 
             pygame.display.flip()
     
@@ -418,7 +432,7 @@ class Game(object):
     def update_panel(self):
         self._panel.surface.fill((150, 150, 150))
         self._top_panel.surface.fill((150, 150, 150))
-        self.menu_button.redraw()
+        self._top_panel.redraw()
 
 if __name__ == '__main__':
     g = Game()

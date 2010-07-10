@@ -7,6 +7,15 @@ from cfg import *
 
 from util import Vec
 
+font = None
+
+def get_font():
+    global font
+    if font is None:
+        fontpath = pygame.font.match_font('arial')
+        font = pygame.font.Font(fontpath, FONT_SIZE)
+    return font
+
 class PanelHolder(object):
     def __init__(self, surface, rect):
         self.rect = rect
@@ -35,6 +44,10 @@ class PanelHolder(object):
             elif rect.collide(r):
                 subpanel.redraw(rect.clip(r))
 
+    def update(self):
+        for r, subpanel in self.subpanels:
+            subpanel.update()
+
 
 class MenuButton(object):
     def __init__(self, surface, rect):
@@ -42,14 +55,13 @@ class MenuButton(object):
         self.rect = rect.copy()
 
         # creating text
-        fontpath = pygame.font.match_font('arial')
-        font = pygame.font.Font(fontpath, FONT_SIZE)
+        font = get_font()
         self.text = font.render('Menu', True, (0,0,0))
         self.clicking = False
 
     def redraw(self, rect=None):
         draw_rect = self.text.get_rect().copy()
-        draw_rect.center = self.rect.center
+        draw_rect.center = self.surface.get_rect().center
         if self.clicking:
             self.surface.fill((100,100,100))
         else:
@@ -63,3 +75,36 @@ class MenuButton(object):
     def onrelease(self, pos, button):
         self.clicking = False
         self.redraw()
+
+    def update(self):
+        pass
+
+
+class MoneyInfo(object):
+    def __init__(self, surface, rect, moneygetter):
+        self.surface = surface.subsurface(rect)
+        self.rect = rect.copy()
+        self.curmoney = None
+        self.font = get_font()
+        self.moneygetter = moneygetter
+
+    def onclick(self, pos, button):
+        pass
+
+    def onrelease(self, pos, button):
+        pass
+
+    def redraw(self, rect=None):
+        self.surface.fill((200,200,200))
+        if self.curmoney is not None:
+            text = '%d$' % int(self.curmoney)
+            textsurface = self.font.render(text, True, (0,0,0))
+            draw_rect = textsurface.get_rect().copy()
+            draw_rect.center = self.surface.get_rect().center
+            self.surface.blit(textsurface, draw_rect.topleft)
+
+    def update(self):
+        money = self.moneygetter()
+        if money != self.curmoney:
+            self.curmoney = money
+            self.redraw()
