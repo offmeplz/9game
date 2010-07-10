@@ -152,8 +152,14 @@ class World(object):
         if creep is None:
             creep = Creep(health=3, speed=2)
         creep_pos = random.choice(list(self.field._enters))
-        creep.place(creep_pos, self.field)
+        creep.place(creep_pos, self.field, self.oncreepexit, self.oncreepdeath)
         self.add_creep(creep)
+
+    def oncreepexit(self, creep):
+        self.lives -= 1
+
+    def oncreepdeath(self, creep):
+        self.money += creep.money
 
 class Field(object):
     def __init__(self, size_x, size_y, enters, exits):
@@ -473,7 +479,6 @@ class Game(object):
         self._tower_for_build_class = None
         self._selected_object = None
         self.info_slot.set_panel(None)
-
 
     def _dispatch_event(self, event):
         if (event.type == QUIT) or (

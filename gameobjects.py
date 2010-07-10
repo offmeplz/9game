@@ -57,9 +57,10 @@ class Creep(GameObject):
     speed = 2.
     health = 3
     
-    def __init__(self, health=None, speed=None):
+    def __init__(self, health=None, speed=None, money=1):
         GameObject.__init__(self)
         self.direction = Vec(0,1)
+        self.money = money
         if health is not None:
             self.health = health
         else:
@@ -73,11 +74,13 @@ class Creep(GameObject):
             cls.img, cls.img_rect = util.load_image(cls.resource_name)
         return cls.img, cls.img_rect.copy()
 
-    def place(self, g_pos, field):
+    def place(self, g_pos, field, onexit, ondeath):
         self.g_pos = Vec(g_pos)
         self.field = field
         self.rect.center = util.game2cscreen(self.g_pos)
         self.curdst = None
+        self.onexit = onexit
+        self.ondeath = ondeath
 
     def update(self, ticks):
         cell_pos = self.current_cell()
@@ -85,6 +88,7 @@ class Creep(GameObject):
         if self.curdst is None:
             if cur_cell.isexit():
                 self.finish()
+                self.onexit(self)
                 return
             dst = self._find_next_dst()
             self.curdst = Vec(dst)
@@ -167,6 +171,7 @@ class Creep(GameObject):
         self.health -= damage
         if self.health <= 0:
             self.kill()
+            self.ondeath(self)
 
 class Tower(object):
     @classmethod
