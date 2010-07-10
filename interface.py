@@ -25,6 +25,17 @@ class PanelHolder(object):
     def addsubpanel(self, subpanel, rect):
         self.subpanels.append((rect, subpanel))
 
+    def removepanel(self, panel):
+        idx = None
+        for i, item in enumerate(self.subpanels):
+            if panel == item[1]:
+                idx = i
+                break
+        if i is None:
+            raise ValueError, "Can't find such panel"
+        self.subpanels[i] = self.subpanels[-1]
+        self.subpanels.pop()
+
     def onclick(self, pos, button):
         for rect, subpanel in self.subpanels:
             if rect.collidepoint(pos):
@@ -103,6 +114,98 @@ class MenuButton(object):
     def update(self):
         pass
 
+
+class Slot(object):
+    def __init__(self, surface):
+        self.surface = surface
+        self.set_panel(None)
+    
+    def onclick(self, pos, button):
+        if self.panel is not None:
+            return self.panel.onclick(pos, button)
+
+    def onrelease(self, pos, button):
+        if self.panel is not None:
+            return self.panel.onrelease(pos, button)
+
+    def update(self):
+        if self.panel is not None:
+            return self.panel.update()
+
+    def set_panel(self, panel):
+        self.panel = panel
+        self.update()
+        self.redraw()
+
+    def redraw(self, rect=None):
+        if self.panel is not None:
+            return self.panel.redraw(rect)
+        else:
+            self.surface.fill((200,200,200))
+
+
+class TowerInfo(object):
+    def __init__(self, surface, tower):
+        self.surface = surface
+        self.tower = tower
+        self.info = None
+        self.font = get_font()
+
+    def onclick(self, pos, button):
+        pass
+
+    def onrelease(self, pos, button):
+        pass
+
+    def redraw(self, rect=None):
+        if self.info is not None:
+            self.surface.fill((200,200,200))
+            name, damage, radius = self.info
+            name_surface = self.font.render(name, True, (0,0,0))
+            damage_text = 'damage: %d' % damage
+            damage_surface = self.font.render(damage_text, True, (0,0,0))
+            radius_text = 'radius: %d' % radius
+            radius_surface = self.font.render(radius_text, True, (0,0,0))
+            self.surface.blit(name_surface, (0,0))
+            self.surface.blit(damage_surface, (0,20))
+            self.surface.blit(radius_surface, (0,40))
+
+    def update(self, rect=None):
+        info = (self.tower.__class__.__name__,
+                self.tower.damage, self.tower.radius)
+        if self.info != info:
+            self.info = info
+            self.redraw()
+
+class CreepInfo(object):
+    def __init__(self, surface, creep):
+        self.surface = surface
+        self.creep = creep
+        self.info = None
+        self.font = get_font()
+
+    def onclick(self, pos, button):
+        pass
+
+    def onrelease(self, pos, button):
+        pass
+
+    def redraw(self, rect=None):
+        if self.info is not None:
+            self.surface.fill((200,200,200))
+            name, health, maxhealth = self.info
+            name_surface = self.font.render(name, True, (0,0,0))
+            health_text = 'health: %d/%d' % (health, maxhealth)
+            health_surface = self.font.render(health_text, True, (0,0,0))
+            self.surface.blit(name_surface, (0,0))
+            self.surface.blit(health_surface, (0,20))
+
+    def update(self, rect=None):
+        info = (self.creep.__class__.__name__,
+                self.creep.health, self.creep.maxhealth)
+        if self.info != info:
+            self.info = info
+            self.redraw()
 
 class TextInfo(object):
     def __init__(self, surface, rect, textgetter, picture=None):

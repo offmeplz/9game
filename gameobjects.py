@@ -190,6 +190,8 @@ class Wall(GameObject, Tower):
     resource_name = 'wall.png'
     size = 1
     cost = 3
+    damage = 0
+    radius = 0
     def __init__(self, g_lefttop):
         GameObject.__init__(self)
         self.rect.center = util.game2cscreen(g_lefttop)

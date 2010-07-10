@@ -16,7 +16,7 @@ import field
 import interface
 import util
 from cfg import *
-from gameobjects import Creep, Wall, SimpleBullet, SimpleTower, Starter
+from gameobjects import Creep, Wall, SimpleBullet, SimpleTower, Starter, Tower
 from util import Vec
 
 import testlevel
@@ -366,6 +366,9 @@ class Game(object):
                     pushfunc)
             self._panel.addsubpanel(button, icon_rect)
 
+        info_rect = Rect((panel_x_size / 3, 0), (panel_x_size / 3, panel_y_size))
+        self.info_slot = interface.Slot(self._panel.surface.subsurface(info_rect))
+        self._panel.addsubpanel(self.info_slot, info_rect)
         self._restart()
 
     def _restart(self):
@@ -407,6 +410,7 @@ class Game(object):
             self._draw_selection()
 
             self._top_panel.update()
+            self._panel.update()
 
             pygame.display.flip()
     
@@ -441,6 +445,7 @@ class Game(object):
     def select_tower_for_build(self, tower_cls):
         self._tower_for_build_class = tower_cls
         self._selected_object = None
+        self.info_slot.set_panel(None)
 
     def select_object(self, obj):
         self._tower_for_build_class = None
@@ -453,10 +458,21 @@ class Game(object):
                     self._selection_surface, (0,255,0),
                     self._selection_surface.get_rect(), 1)
 
+            if isinstance(obj, Tower):
+                towerinfo = interface.TowerInfo(
+                        self.info_slot.surface, obj)
+                self.info_slot.set_panel(towerinfo)
+            elif isinstance(obj, Creep):
+                creepinfo = interface.CreepInfo(
+                        self.info_slot.surface, obj)
+                self.info_slot.set_panel(creepinfo)
+            else:
+                self.info_slot.set_panel(None)
 
     def reset_selection(self):
         self._tower_for_build_class = None
         self._selected_object = None
+        self.info_slot.set_panel(None)
 
 
     def _dispatch_event(self, event):
@@ -504,7 +520,6 @@ class Game(object):
         elif event.type == MOUSEBUTTONUP:
             if self._top_panel.rect.collidepoint(event.pos):
                 self._top_panel.onrelease(event.pos, event.button)
-
 
     def _exit(self):
         self._state = 'EXIT'
