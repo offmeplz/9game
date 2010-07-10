@@ -259,3 +259,18 @@ class Vec(object):
 
     def perpendicular(self):
         return Vec(self.y, -self.x)
+
+
+class MessageQueue(object):
+    def __init__(self):
+        self.msg = None
+        self.endtime = None
+
+    def get_message(self):
+        if self.msg is not None and self.endtime < pygame.time.get_ticks():
+            self.msg = None
+        return self.msg
+
+    def post_message(self, msg, time):
+        self.msg = msg
+        self.endtime = pygame.time.get_ticks() + time * 1000

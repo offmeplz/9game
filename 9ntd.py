@@ -112,7 +112,7 @@ class World(object):
             raise ValueError, "Unknown tower type: %s" % repr(cls)
 
         if pygame.sprite.spritecollideany(tower, self.creeps):
-            return False
+            raise BuildError, "Can't build on creeps"
         
         buildcells = list(util.iterpoints(pos, (cls.size, cls.size)))
         self.field.buildon(*buildcells)
@@ -134,7 +134,6 @@ class World(object):
         tower.add([self.towers])
         for creep in self.creeps:
             creep.forget_way()
-
         self.money -= tower.cost
 
     def update(self, ticks):
@@ -294,9 +293,12 @@ class Game(object):
         self._game_speed = 1
         self._clock = None
         self._start_time = None
+        self._messages = util.MessageQueue()
 
         self._tower_sketch_rect = None
         self._tower_for_build_class = SimpleTower
+
+        # creating interface.
 
         panel_rect = Rect((0, top_panel_y_size + field_y_size), (panel_x_size, panel_y_size))
         self._panel = interface.PanelHolder(self._screen, panel_rect)
@@ -304,21 +306,21 @@ class Game(object):
         top_panel_rect = Rect((0,0), (top_panel_x_size, top_panel_y_size))
         self._top_panel = interface.PanelHolder(self._screen, top_panel_rect)
 
-        menu_rect = Rect((0, 0), (top_panel_x_size / 5, top_panel_y_size))
+        menu_rect = Rect((0, 0), (top_panel_x_size / 6, top_panel_y_size))
         self.menu_button = interface.MenuButton(
                 self._top_panel.surface, menu_rect)
         self._top_panel.addsubpanel(self.menu_button, menu_rect)
 
         def get_money_text():
             return '%d $' % self.world.get_money()
-        money_rect = Rect((top_panel_x_size * 4 / 5, 0), (top_panel_x_size / 5, top_panel_y_size))
+        money_rect = Rect((top_panel_x_size * 5 / 6, 0), (top_panel_x_size / 6, top_panel_y_size))
         money_info = interface.TextInfo(
                 self._top_panel.surface, money_rect, get_money_text)
         self._top_panel.addsubpanel(money_info, menu_rect)
 
         def get_lives_text():
             return str(self.world.get_lives())
-        lives_rect = Rect((top_panel_x_size * 3 / 5, 0), (top_panel_x_size / 5, top_panel_y_size))
+        lives_rect = Rect((top_panel_x_size * 4 / 6, 0), (top_panel_x_size / 6, top_panel_y_size))
         lives_info = interface.TextInfo(
                 self._top_panel.surface, lives_rect, get_lives_text)
         self._top_panel.addsubpanel(lives_info, lives_rect)
@@ -327,21 +329,28 @@ class Game(object):
             if self._start_time is None:
                 return ''
             else:
-                time_delta = datetime.datetime.now() - self._start_time
-                secs = time_delta.seconds
+                msecs = pygame.time.get_ticks() - self._start_time
+                secs = msecs / 1000
                 return '%02d:%02d' % (secs / 60, secs % 60)
-        time_rect = Rect((top_panel_x_size / 5, 0), (top_panel_x_size / 5, top_panel_y_size))
+        time_rect = Rect((top_panel_x_size / 6, 0), (top_panel_x_size / 6, top_panel_y_size))
         time_info = interface.TextInfo(
                 self._top_panel.surface, time_rect, get_time_text)
-        self._top_panel.addsubpanel(time_info, lives_rect)
+        self._top_panel.addsubpanel(time_info, time_rect)
+
+        def get_message():
+            return self._messages.get_message()
+        msg_rect = Rect((top_panel_x_size * 2 / 6, 0), (top_panel_x_size * 2 / 6, top_panel_y_size))
+        msg_info = interface.TextInfo(
+                self._top_panel.surface, msg_rect, get_message)
+        self._top_panel.addsubpanel(msg_info, msg_rect)
+
 
         self._restart()
-
 
     def _restart(self):
         self._continue_main_loop = True
         self._clock = pygame.time.Clock()
-        self._start_time = datetime.datetime.now()
+        self._start_time = pygame.time.get_ticks()
         self._state = 'PLAY'
         self.background = pygame.Surface(self._field_surface.get_size()).convert()
         color = (255,255,255)
@@ -350,6 +359,7 @@ class Game(object):
         self.static = self.background.copy()
         self.ground = self.background.copy()
         self.air = self.background.copy()
+        self._messages.post_message('Start!', 3)
 
         self.update_panel()
 
@@ -419,6 +429,7 @@ class Game(object):
                         self.update_static_layer()
                     except BuildError, e:
                         # TODO: Show message to player.
+                        self._messages.post_message(str(e), 3)
                         pass
                 elif event.button == 2:
                     for creep in self.world.creeps:
@@ -469,4 +480,3 @@ class Game(object):
 if __name__ == '__main__':
     g = Game()
     g.run()
-
