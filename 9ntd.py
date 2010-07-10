@@ -16,7 +16,7 @@ import field
 import interface
 import util
 from cfg import *
-from gameobjects import Creep, Wall, SimpleBullet, SimpleTower, Starter, Tower, Blood
+from gameobjects import Creep, Wall, SimpleBullet, SimpleTower, Starter, Tower, Blood, Message
 from util import Vec
 
 import testlevel
@@ -74,6 +74,7 @@ class World(object):
         self.towers = pygame.sprite.Group()
         self.missles = pygame.sprite.Group()
         self.corpse = pygame.sprite.Group()
+        self.messages = pygame.sprite.Group()
         self.ticks_elapsed = 0
 
         self.creepwave = Starter(
@@ -146,6 +147,7 @@ class World(object):
         self.towers.update(ticks)
         self.creeps.update(ticks)
         self.missles.update(ticks)
+        self.messages.update(ticks)
 
     def draw(self, surface):
         self.creeps.draw(surface)
@@ -164,6 +166,8 @@ class World(object):
     def oncreepdeath(self, creep):
         self.money += creep.money
         self.corpse.add(Blood(creep))
+        message = '+%d' % creep.money
+        self.messages.add(Message(message, 1, creep.g_pos, 'black'))
 
 class Field(object):
     def __init__(self, size_x, size_y, enters, exits):
@@ -411,6 +415,7 @@ class Game(object):
             if self._state == 'PLAY':
                 self.world.creeps.clear(self._field_surface, self.static)
                 self.world.missles.clear(self._field_surface, self.static)
+                self.world.messages.clear(self._field_surface, self.static)
                 if self._tower_sketch_rect is not None:
                     self._field_surface.blit(self.static, self._tower_sketch_rect.topleft, self._tower_sketch_rect)
                 if self._selection_rect is not None:
@@ -426,6 +431,7 @@ class Game(object):
                 self.world.corpse.empty()
                 self.world.creeps.draw(self._field_surface)
                 self.world.missles.draw(self._field_surface)
+                self.world.messages.draw(self._field_surface)
 
                 self._draw_tower_sketch()
                 self._draw_selection()

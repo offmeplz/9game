@@ -5,6 +5,7 @@ import collections
 import pygame
 
 import util
+import interface
 from util import Vec, signum
 
 
@@ -31,6 +32,27 @@ class Blood(GameObject):
     def __init__(self, obj):
         GameObject.__init__(self)
         self.rect.center = obj.rect.center
+
+class Message(pygame.sprite.Sprite):
+    speed = 1.
+    def __init__(self, text, lifetime, g_pos, color):
+        pygame.sprite.Sprite.__init__(self)
+        self.lifeticks = lifetime * TICK_PER_SEC
+        font = interface.get_font()
+        self.image = font.render(text, True, pygame.Color(color))
+        self.g_pos = g_pos
+        self.rect = self.image.get_rect()
+        self.rect.center = util.game2cscreen(g_pos)
+
+    def update(self, ticks):
+        self.lifeticks -= ticks
+        if self.lifeticks <= 0:
+            self.kill()
+            return
+
+        self.g_pos -= Vec(0, self.speed / TICK_PER_SEC)
+        self.rect.center = util.game2cscreen(self.g_pos)
+
 
 class Starter(object):
     @staticmethod
