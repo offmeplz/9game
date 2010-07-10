@@ -38,7 +38,5 @@ TOWERS = [
         SimpleTower,
         ]
 
-# Gold that player has at game start.
 INIT_MONEY = 50
-
 LIVES = 20
