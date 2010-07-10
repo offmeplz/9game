@@ -6,6 +6,7 @@ import random
 from collections import deque
 from itertools import product, count
 from math import sqrt
+import datetime
 
 import pygame
 from pygame.locals import *
@@ -77,12 +78,16 @@ class World(object):
                 self.spawn_creep)
 
         self.money = testlevel.INIT_MONEY
+        self.lives = testlevel.LIVES
 
     def add_creep(self, creep):
         creep.add([self.creeps])
 
     def get_money(self):
         return self.money
+
+    def get_lives(self):
+        return self.lives
 
     def build_tower(self, tower_cls, pos):
         sizes = (tower_cls.size, tower_cls.size)
@@ -283,6 +288,8 @@ class Game(object):
         self._field_rect = field_rect
         self._field_surface = self._screen.subsurface(field_rect)
         self._game_speed = 1
+        self._clock = None
+        self._start_time = None
 
         self._tower_sketch_rect = None
         self._tower_for_build_class = SimpleTower
@@ -296,13 +303,33 @@ class Game(object):
         menu_rect = Rect((0, 0), (top_panel_x_size / 5, top_panel_y_size))
         self.menu_button = interface.MenuButton(
                 self._top_panel.surface, menu_rect)
-
-        money_rect = Rect((top_panel_x_size * 4 / 5, 0), (top_panel_x_size / 5, top_panel_y_size))
-        money_info = interface.MoneyInfo(
-                self._top_panel.surface, money_rect, self.world.get_money)
-
         self._top_panel.addsubpanel(self.menu_button, menu_rect)
+
+        def get_money_text():
+            return '%d $' % self.world.get_money()
+        money_rect = Rect((top_panel_x_size * 4 / 5, 0), (top_panel_x_size / 5, top_panel_y_size))
+        money_info = interface.TextInfo(
+                self._top_panel.surface, money_rect, get_money_text)
         self._top_panel.addsubpanel(money_info, menu_rect)
+
+        def get_lives_text():
+            return str(self.world.get_lives())
+        lives_rect = Rect((top_panel_x_size * 3 / 5, 0), (top_panel_x_size / 5, top_panel_y_size))
+        lives_info = interface.TextInfo(
+                self._top_panel.surface, lives_rect, get_lives_text)
+        self._top_panel.addsubpanel(lives_info, lives_rect)
+
+        def get_time_text():
+            if self._start_time is None:
+                return ''
+            else:
+                time_delta = datetime.datetime.now() - self._start_time
+                secs = time_delta.seconds
+                return '%02d:%02d' % (secs / 60, secs % 60)
+        time_rect = Rect((top_panel_x_size / 5, 0), (top_panel_x_size / 5, top_panel_y_size))
+        time_info = interface.TextInfo(
+                self._top_panel.surface, time_rect, get_time_text)
+        self._top_panel.addsubpanel(time_info, lives_rect)
 
         self._restart()
 
@@ -310,6 +337,7 @@ class Game(object):
     def _restart(self):
         self._continue_main_loop = True
         self._clock = pygame.time.Clock()
+        self._start_time = datetime.datetime.now()
         self._state = 'PLAY'
         self.background = pygame.Surface(self._field_surface.get_size()).convert()
         color = (255,255,255)

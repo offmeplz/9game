@@ -80,13 +80,14 @@ class MenuButton(object):
         pass
 
 
-class MoneyInfo(object):
-    def __init__(self, surface, rect, moneygetter):
+class TextInfo(object):
+    def __init__(self, surface, rect, textgetter, picture=None):
         self.surface = surface.subsurface(rect)
         self.rect = rect.copy()
-        self.curmoney = None
+        self.curtext = None
         self.font = get_font()
-        self.moneygetter = moneygetter
+        self.textgetter = textgetter
+        self.picture = picture
 
     def onclick(self, pos, button):
         pass
@@ -96,15 +97,16 @@ class MoneyInfo(object):
 
     def redraw(self, rect=None):
         self.surface.fill((200,200,200))
-        if self.curmoney is not None:
-            text = '%d$' % int(self.curmoney)
-            textsurface = self.font.render(text, True, (0,0,0))
+        if self.picture is not None:
+            self.surface.blit(self.picture, (0,0))
+        if self.curtext is not None:
+            textsurface = self.font.render(self.curtext, True, (0,0,0))
             draw_rect = textsurface.get_rect().copy()
             draw_rect.center = self.surface.get_rect().center
             self.surface.blit(textsurface, draw_rect.topleft)
 
     def update(self):
-        money = self.moneygetter()
-        if money != self.curmoney:
-            self.curmoney = money
+        curtext = self.textgetter()
+        if curtext != self.curtext:
+            self.curtext = curtext
             self.redraw()
