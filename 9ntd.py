@@ -16,7 +16,7 @@ import field
 import interface
 import util
 from cfg import *
-from gameobjects import Creep, Wall, SimpleBullet, SimpleTower, Starter, Tower
+from gameobjects import Creep, Wall, SimpleBullet, SimpleTower, Starter, Tower, Blood
 from util import Vec
 
 import testlevel
@@ -73,6 +73,7 @@ class World(object):
         self.creeps = pygame.sprite.Group()
         self.towers = pygame.sprite.Group()
         self.missles = pygame.sprite.Group()
+        self.corpse = pygame.sprite.Group()
 
         self.creepwave = Starter(
                 testlevel.CREEP_WAVES[0]['creeps'],
@@ -160,6 +161,7 @@ class World(object):
 
     def oncreepdeath(self, creep):
         self.money += creep.money
+        self.corpse.add(Blood(creep))
 
 class Field(object):
     def __init__(self, size_x, size_y, enters, exits):
@@ -409,11 +411,17 @@ class Game(object):
 
             self.world.update(self._game_speed)
 
+            if BLOOD:
+                self.world.corpse.draw(self.background)
+                self.world.corpse.draw(self.static)
+                self.world.corpse.draw(self._field_surface)
+            self.world.corpse.empty()
             self.world.creeps.draw(self._field_surface)
             self.world.missles.draw(self._field_surface)
 
             self._draw_tower_sketch()
             self._draw_selection()
+
 
             self._top_panel.update()
             self._panel.update()

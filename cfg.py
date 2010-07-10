@@ -21,3 +21,5 @@ RESOURCE_PATH = 'resources'
 DRAW_ARROWS = False
 
 FONT_SIZE = 12
+
+BLOOD = True

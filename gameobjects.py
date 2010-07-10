@@ -26,6 +26,12 @@ class GameObject(pygame.sprite.Sprite):
     def update(self, ticks):
         pass
 
+class Blood(GameObject):
+    resource_name = 'blood.png'
+    def __init__(self, obj):
+        GameObject.__init__(self)
+        self.rect.center = obj.rect.center
+
 class Starter(object):
     @staticmethod
     def defaultcallback(arg):
