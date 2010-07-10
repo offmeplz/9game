@@ -386,6 +386,8 @@ class Game(object):
         self.background = pygame.Surface(self._field_surface.get_size()).convert()
         color = (255,255,255)
         self.background.fill(color)
+        self.pause_mask = pygame.Surface(self._field_surface.get_size()).convert_alpha()
+        self.pause_mask.fill((100,100,100,150))
 
         self.static = self.background.copy()
         self.ground = self.background.copy()
@@ -406,26 +408,27 @@ class Game(object):
                 elif self._state == 'PAUSE':
                     self._dispatch_pause_event(e)
 
-            self.world.creeps.clear(self._field_surface, self.static)
-            self.world.missles.clear(self._field_surface, self.static)
-            if self._tower_sketch_rect is not None:
-                self._field_surface.blit(self.static, self._tower_sketch_rect.topleft, self._tower_sketch_rect)
-            if self._selection_rect is not None:
-                self._field_surface.blit(self.static, self._selection_rect.topleft, self._selection_rect)
-
             if self._state == 'PLAY':
+                self.world.creeps.clear(self._field_surface, self.static)
+                self.world.missles.clear(self._field_surface, self.static)
+                if self._tower_sketch_rect is not None:
+                    self._field_surface.blit(self.static, self._tower_sketch_rect.topleft, self._tower_sketch_rect)
+                if self._selection_rect is not None:
+                    self._field_surface.blit(self.static, self._selection_rect.topleft, self._selection_rect)
+
                 self.world.update(self._game_speed)
 
-            if BLOOD:
-                self.world.corpse.draw(self.background)
-                self.world.corpse.draw(self.static)
-                self.world.corpse.draw(self._field_surface)
-            self.world.corpse.empty()
-            self.world.creeps.draw(self._field_surface)
-            self.world.missles.draw(self._field_surface)
+                if BLOOD:
+                    self.world.corpse.draw(self.background)
+                    self.world.corpse.draw(self.static)
+                    self.world.corpse.draw(self._field_surface)
 
-            self._draw_tower_sketch()
-            self._draw_selection()
+                self.world.corpse.empty()
+                self.world.creeps.draw(self._field_surface)
+                self.world.missles.draw(self._field_surface)
+
+                self._draw_tower_sketch()
+                self._draw_selection()
 
 
             self._top_panel.update()
@@ -496,8 +499,12 @@ class Game(object):
     def toggle_pause(self):
         if self._state == 'PLAY':
             self._state = 'PAUSE'
+            self._field_surface.blit(self.pause_mask, (0,0))
+            self._messages.post_message('Pause!', 3)
         elif self._state == 'PAUSE':
             self._state = 'PLAY'
+            self._messages.post_message('Play!', 3)
+            self._field_surface.blit(self.static, (0,0))
 
     def _dispatch_pause_event(self, event):
         if (event.type == QUIT) or (
