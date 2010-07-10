@@ -65,7 +65,7 @@ class Cell(object):
 
 
 class World(object):
-    def __init__(self):
+    def __init__(self, level):
         enters =[(0, i) for i in xrange(GAME_Y_SIZE)]
         exits = [(GAME_X_SIZE - 1, i) for i in xrange(GAME_Y_SIZE)]
         self.field = Field(GAME_X_SIZE, GAME_Y_SIZE, enters, exits)
@@ -76,11 +76,11 @@ class World(object):
         self.corpse = pygame.sprite.Group()
 
         self.creepwave = Starter(
-                testlevel.CREEP_WAVES[0]['creeps'],
+                level.CREEP_WAVES[0]['creeps'],
                 self.spawn_creep)
 
-        self.money = testlevel.INIT_MONEY
-        self.lives = testlevel.LIVES
+        self.money = level.INIT_MONEY
+        self.lives = level.LIVES
 
     def add_creep(self, creep):
         creep.add([self.creeps])
@@ -294,8 +294,6 @@ class Game(object):
         window = pygame.display.set_mode((window_x_size, window_y_size))
         self._screen = pygame.display.get_surface()
 
-        #self.world = World()
-
         field_rect = Rect((0,top_panel_y_size), (field_x_size, field_y_size))
         self._field_rect = field_rect
         self._field_surface = self._screen.subsurface(field_rect)
@@ -380,7 +378,8 @@ class Game(object):
         self._restart()
 
     def _restart(self):
-        self.world = World()
+        reload(testlevel)
+        self.world = World(testlevel)
         self._continue_main_loop = True
         self._clock = pygame.time.Clock()
         self._start_time = pygame.time.get_ticks()
@@ -393,6 +392,8 @@ class Game(object):
         self.ground = self.background.copy()
         self.air = self.background.copy()
         self._messages.post_message('Start!', 3)
+
+        self._field_surface.blit(self.background, (0,0))
 
         self.update_panel()
 
@@ -520,6 +521,8 @@ class Game(object):
                 self._game_speed = 4
             elif event.key == K_RETURN:
                 self.toggle_pause()
+            elif event.key == K_F10:
+                self._restart()
         elif event.type == KEYUP:
             if event.key == K_SPACE:
                 self._game_speed = 1
