@@ -36,6 +36,6 @@ CREEP_WAVES = [
 TOWERS = []
 
 # Gold that player has at game start.
-INIT_MONEY = 80
+INIT_MONEY = 50
 
 LIVES = 20
