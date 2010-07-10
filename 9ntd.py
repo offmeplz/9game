@@ -76,6 +76,7 @@ class World(object):
         self.corpse = pygame.sprite.Group()
         self.messages = pygame.sprite.Group()
         self.ticks_elapsed = 0
+        self.sell_factor = level.SELL_FACTOR
 
         self.creepwave = Starter(
                 level.CREEP_WAVES[0]['creeps'],
@@ -92,6 +93,19 @@ class World(object):
 
     def get_lives(self):
         return self.lives
+
+    def sell_tower(self, tower):
+        sizes = (tower.size, tower.size)
+        topleft = util.placeintrect(tower.g_pos, sizes)
+        cells = util.iterpoints(topleft, sizes)
+        self.field.clearon(*cells)
+
+        money = int(self.sell_factor * tower.cost)
+        message = '+%d' % money
+        self.money += money
+        self.messages.add(Message(message, 1, tower.g_pos, 'black'))
+
+        tower.kill()
 
     def build_tower(self, tower_cls, pos):
         if tower_cls.cost > self.get_money():
@@ -528,13 +542,19 @@ class Game(object):
             if event.key == K_w:
                 self.select_tower_for_build(Wall)
             elif event.key == K_s:
-                self.select_tower_for_build(SimpleTower)
+                self.select_tower_for_bjuild(SimpleTower)
             elif event.key == K_SPACE:
                 self._game_speed = 4
             elif event.key == K_RETURN:
                 self.toggle_pause()
             elif event.key == K_F10:
                 self._restart()
+            elif event.key == K_DELETE:
+                obj = self._selected_object
+                if isinstance(obj, Tower):
+                    self.world.sell_tower(obj)
+                    self.update_static_layer()
+
         elif event.type == KEYUP:
             if event.key == K_SPACE:
                 self._game_speed = 1
