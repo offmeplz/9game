@@ -4,6 +4,7 @@
 import random
 
 from collections import deque
+import itertools
 from itertools import product, count
 from math import sqrt
 import datetime
@@ -296,7 +297,10 @@ class Game(object):
         self._messages = util.MessageQueue()
 
         self._tower_sketch_rect = None
-        self._tower_for_build_class = SimpleTower
+        self._tower_for_build_class = None
+        self._selected_object = None
+        self._selection_surface = None
+        self._selection_rect = None
 
         # creating interface.
 
@@ -355,7 +359,7 @@ class Game(object):
             icon = pygame.transform.scale(img, icon_sizes)
             icon_rect = Rect((i * GAME_CELL_SIZE, 0), icon_sizes)
             def pushfunc(a=towercls):
-                self.select_tower(a)
+                self.select_tower_for_build(a)
             button = interface.TowerButton(
                     self.build_panel.surface.subsurface(icon_rect),
                     icon,
@@ -391,6 +395,8 @@ class Game(object):
             self.world.missles.clear(self._field_surface, self.static)
             if self._tower_sketch_rect is not None:
                 self._field_surface.blit(self.static, self._tower_sketch_rect.topleft, self._tower_sketch_rect)
+            if self._selection_rect is not None:
+                self._field_surface.blit(self.static, self._selection_rect.topleft, self._selection_rect)
 
             self.world.update(self._game_speed)
 
@@ -398,6 +404,7 @@ class Game(object):
             self.world.missles.draw(self._field_surface)
 
             self._draw_tower_sketch()
+            self._draw_selection()
 
             self._top_panel.update()
 
@@ -415,6 +422,15 @@ class Game(object):
             self._tower_sketch_rect = tower_cls.draw_oksketch_on(
                     self._field_surface, s_topleft)
 
+    def _draw_selection(self):
+        if self._selected_object is not None:
+            self._selection_rect = self._selection_surface.get_rect()
+            self._selection_rect.center = self._selected_object.rect.center
+            self._field_surface.blit(self._selection_surface, self._selection_rect.topleft)
+            if not self._selected_object.alive():
+                self._selected_object = None
+
+
     def _to_field_coord(self, pos):
         if self._field_rect.collidepoint(pos):
             return (pos[0] - self._field_rect.left,
@@ -422,8 +438,26 @@ class Game(object):
         else:
             return None
 
-    def select_tower(self, tower_cls):
+    def select_tower_for_build(self, tower_cls):
         self._tower_for_build_class = tower_cls
+        self._selected_object = None
+
+    def select_object(self, obj):
+        self._tower_for_build_class = None
+        self._selected_object = obj
+        if obj is not None:
+            self._selection_surface = pygame.surface.Surface((
+                obj.rect.width + 4, obj.rect.height + 4)).convert_alpha()
+            self._selection_surface.fill((0,0,0,0))
+            pygame.draw.rect(
+                    self._selection_surface, (0,255,0),
+                    self._selection_surface.get_rect(), 1)
+
+
+    def reset_selection(self):
+        self._tower_for_build_class = None
+        self._selected_object = None
+
 
     def _dispatch_event(self, event):
         if (event.type == QUIT) or (
@@ -431,9 +465,9 @@ class Game(object):
             self._exit()
         elif event.type == KEYDOWN:
             if event.key == K_w:
-                self.select_tower(Wall)
+                self.select_tower_for_build(Wall)
             elif event.key == K_s:
-                self.select_tower(SimpleTower)
+                self.select_tower_for_build(SimpleTower)
             elif event.key == K_SPACE:
                 self._game_speed = 4
         elif event.type == KEYUP:
@@ -444,16 +478,24 @@ class Game(object):
                 pos = self._to_field_coord(event.pos)
                 if event.button == 1:
                     game_pos = util.screen2fgame(pos)
-                    try:
-                        self.world.build_tower(self._tower_for_build_class, game_pos)
-                        self.update_static_layer()
-                    except BuildError, e:
-                        self._messages.post_message(str(e), 3)
+                    if self._tower_for_build_class is None:
+                        for obj in itertools.chain(self.world.towers, self.world.creeps):
+                            if obj.rect.collidepoint(pos):
+                                self.select_object(obj)
+                                break
+                    else:
+                        try:
+                            self.world.build_tower(self._tower_for_build_class, game_pos)
+                            self.update_static_layer()
+                        except BuildError, e:
+                            self._messages.post_message(str(e), 3)
                 elif event.button == 2:
                     for creep in self.world.creeps:
                         b = SimpleBullet(util.screen2fgame(pos), creep, 1, 20)
                         self.world.missles.add(b)
                         break
+                elif event.button == 3:
+                    self.reset_selection()
             elif self._top_panel.rect.collidepoint(event.pos):
                 self._top_panel.onclick(event.pos, event.button)
             elif self._panel.rect.collidepoint(event.pos):
