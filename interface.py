@@ -48,6 +48,30 @@ class PanelHolder(object):
         for r, subpanel in self.subpanels:
             subpanel.update()
 
+class TowerButton(object):
+    def __init__(self, surface, img, pushfunc):
+        self.surface = surface
+        self.image = img
+        self.selected = False
+        self.pushfunc = pushfunc
+
+    def redraw(self, rect=None):
+        if self.selected:
+            color = (200,200,200)
+        else:
+            color = (255,255,255)
+
+        self.surface.fill(color)
+        self.surface.blit(self.image, (0,0))
+
+    def onclick(self, pos, button):
+        self.pushfunc()
+
+    def onrelease(self, pos, button):
+        pass
+
+    def update(self):
+        pass
 
 class MenuButton(object):
     def __init__(self, surface, rect):

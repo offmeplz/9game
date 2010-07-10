@@ -2,7 +2,7 @@
 #vim:fileencoding=utf-8
 
 from itertools import count
-from gameobjects import Creep
+from gameobjects import Creep, Wall, SimpleTower
 
 # Set map
 # > -- enter
@@ -33,7 +33,10 @@ CREEP_WAVES = [
         ]
 
 # Availible towers.
-TOWERS = []
+TOWERS = [
+        Wall,
+        SimpleTower,
+        ]
 
 # Gold that player has at game start.
 INIT_MONEY = 50

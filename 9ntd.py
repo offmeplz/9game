@@ -344,6 +344,23 @@ class Game(object):
                 self._top_panel.surface, msg_rect, get_message)
         self._top_panel.addsubpanel(msg_info, msg_rect)
 
+        build_rect = Rect((panel_x_size * 2 / 3, 0), (panel_x_size / 3, panel_y_size))
+        self.build_panel = interface.PanelHolder(self._panel.surface, build_rect)
+        self._panel.addsubpanel(self.build_panel, build_rect)
+
+        # place buttons
+        for i, towercls in enumerate(testlevel.TOWERS):
+            img, rect = towercls.get_img_rect()
+            icon_sizes = (GAME_CELL_SIZE, GAME_CELL_SIZE)
+            icon = pygame.transform.scale(img, icon_sizes)
+            icon_rect = Rect((i * GAME_CELL_SIZE, 0), icon_sizes)
+            def pushfunc(a=towercls):
+                self.select_tower(a)
+            button = interface.TowerButton(
+                    self.build_panel.surface.subsurface(icon_rect),
+                    icon,
+                    pushfunc)
+            self._panel.addsubpanel(button, icon_rect)
 
         self._restart()
 
@@ -405,15 +422,18 @@ class Game(object):
         else:
             return None
 
+    def select_tower(self, tower_cls):
+        self._tower_for_build_class = tower_cls
+
     def _dispatch_event(self, event):
         if (event.type == QUIT) or (
                 event.type == KEYDOWN and event.key == K_ESCAPE):
             self._exit()
         elif event.type == KEYDOWN:
             if event.key == K_w:
-                self._tower_for_build_class = Wall
+                self.select_tower(Wall)
             elif event.key == K_s:
-                self._tower_for_build_class = SimpleTower
+                self.select_tower(SimpleTower)
             elif event.key == K_SPACE:
                 self._game_speed = 4
         elif event.type == KEYUP:
@@ -428,9 +448,7 @@ class Game(object):
                         self.world.build_tower(self._tower_for_build_class, game_pos)
                         self.update_static_layer()
                     except BuildError, e:
-                        # TODO: Show message to player.
                         self._messages.post_message(str(e), 3)
-                        pass
                 elif event.button == 2:
                     for creep in self.world.creeps:
                         b = SimpleBullet(util.screen2fgame(pos), creep, 1, 20)
@@ -438,9 +456,13 @@ class Game(object):
                         break
             elif self._top_panel.rect.collidepoint(event.pos):
                 self._top_panel.onclick(event.pos, event.button)
+            elif self._panel.rect.collidepoint(event.pos):
+                pos = Vec(event.pos) - Vec(self._panel.rect.topleft)
+                self._panel.onclick(pos, event.button)
         elif event.type == MOUSEBUTTONUP:
             if self._top_panel.rect.collidepoint(event.pos):
                 self._top_panel.onrelease(event.pos, event.button)
+
 
     def _exit(self):
         self._state = 'EXIT'
@@ -476,6 +498,7 @@ class Game(object):
         self._panel.surface.fill((150, 150, 150))
         self._top_panel.surface.fill((150, 150, 150))
         self._top_panel.redraw()
+        self._panel.redraw()
 
 if __name__ == '__main__':
     g = Game()
