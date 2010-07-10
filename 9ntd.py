@@ -74,6 +74,7 @@ class World(object):
         self.towers = pygame.sprite.Group()
         self.missles = pygame.sprite.Group()
         self.corpse = pygame.sprite.Group()
+        self.ticks_elapsed = 0
 
         self.creepwave = Starter(
                 level.CREEP_WAVES[0]['creeps'],
@@ -139,6 +140,7 @@ class World(object):
         self.money -= tower.cost
 
     def update(self, ticks):
+        self.ticks_elapsed += ticks
         self.creepwave.update(ticks)
 
         self.towers.update(ticks)
@@ -299,7 +301,6 @@ class Game(object):
         self._field_surface = self._screen.subsurface(field_rect)
         self._game_speed = 1
         self._clock = None
-        self._start_time = None
         self._messages = util.MessageQueue()
 
         self._tower_sketch_rect = None
@@ -336,11 +337,10 @@ class Game(object):
         self._top_panel.addsubpanel(lives_info, lives_rect)
 
         def get_time_text():
-            if self._start_time is None:
+            if self.world is None:
                 return ''
             else:
-                msecs = pygame.time.get_ticks() - self._start_time
-                secs = msecs / 1000
+                secs = self.world.ticks_elapsed / TICK_PER_SEC
                 return '%02d:%02d' % (secs / 60, secs % 60)
         time_rect = Rect((top_panel_x_size / 6, 0), (top_panel_x_size / 6, top_panel_y_size))
         time_info = interface.TextInfo(
@@ -382,7 +382,6 @@ class Game(object):
         self.world = World(testlevel)
         self._continue_main_loop = True
         self._clock = pygame.time.Clock()
-        self._start_time = pygame.time.get_ticks()
         self._state = 'PLAY'
         self.background = pygame.Surface(self._field_surface.get_size()).convert()
         color = (255,255,255)
