@@ -189,6 +189,7 @@ class Tower(object):
 class Wall(GameObject, Tower):
     resource_name = 'wall.png'
     size = 1
+    cost = 3
     def __init__(self, g_lefttop):
         GameObject.__init__(self)
         self.rect.center = util.game2cscreen(g_lefttop)
@@ -249,6 +250,7 @@ class SimpleTower(GameObject, Tower):
     recharge_ticks = recharge_time * TICK_PER_SEC
     bullet_speed = 5
     size = 2
+    cost = 5
 
     def __init__(self, g_lefttop, creeps, missles):
         GameObject.__init__(self)

@@ -90,6 +90,8 @@ class World(object):
         return self.lives
 
     def build_tower(self, tower_cls, pos):
+        if tower_cls.cost > self.get_money():
+            raise BuildError, "Not enough money"
         sizes = (tower_cls.size, tower_cls.size)
         topleft = util.placeintrect(pos, sizes)
         canbuild = all(
@@ -132,6 +134,8 @@ class World(object):
         tower.add([self.towers])
         for creep in self.creeps:
             creep.forget_way()
+
+        self.money -= tower.cost
 
     def update(self, ticks):
         self.creepwave.update(ticks)
