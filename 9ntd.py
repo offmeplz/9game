@@ -294,7 +294,7 @@ class Game(object):
         window = pygame.display.set_mode((window_x_size, window_y_size))
         self._screen = pygame.display.get_surface()
 
-        self.world = World()
+        #self.world = World()
 
         field_rect = Rect((0,top_panel_y_size), (field_x_size, field_y_size))
         self._field_rect = field_rect
@@ -380,6 +380,7 @@ class Game(object):
         self._restart()
 
     def _restart(self):
+        self.world = World()
         self._continue_main_loop = True
         self._clock = pygame.time.Clock()
         self._start_time = pygame.time.get_ticks()
@@ -400,7 +401,10 @@ class Game(object):
             time_passed = self._clock.tick(TICK_PER_SEC)
             events = pygame.event.get()
             for e in events:
-                self._dispatch_event(e)
+                if self._state == 'PLAY':
+                    self._dispatch_play_event(e)
+                elif self._state == 'PAUSE':
+                    self._dispatch_pause_event(e)
 
             self.world.creeps.clear(self._field_surface, self.static)
             self.world.missles.clear(self._field_surface, self.static)
@@ -409,7 +413,8 @@ class Game(object):
             if self._selection_rect is not None:
                 self._field_surface.blit(self.static, self._selection_rect.topleft, self._selection_rect)
 
-            self.world.update(self._game_speed)
+            if self._state == 'PLAY':
+                self.world.update(self._game_speed)
 
             if BLOOD:
                 self.world.corpse.draw(self.background)
@@ -488,7 +493,21 @@ class Game(object):
         self._selected_object = None
         self.info_slot.set_panel(None)
 
-    def _dispatch_event(self, event):
+    def toggle_pause(self):
+        if self._state == 'PLAY':
+            self._state = 'PAUSE'
+        elif self._state == 'PAUSE':
+            self._state = 'PLAY'
+
+    def _dispatch_pause_event(self, event):
+        if (event.type == QUIT) or (
+                event.type == KEYDOWN and event.key == K_ESCAPE):
+            self._exit()
+        elif event.type == KEYDOWN:
+            if event.key == K_RETURN:
+                self.toggle_pause()
+
+    def _dispatch_play_event(self, event):
         if (event.type == QUIT) or (
                 event.type == KEYDOWN and event.key == K_ESCAPE):
             self._exit()
@@ -499,6 +518,8 @@ class Game(object):
                 self.select_tower_for_build(SimpleTower)
             elif event.key == K_SPACE:
                 self._game_speed = 4
+            elif event.key == K_RETURN:
+                self.toggle_pause()
         elif event.type == KEYUP:
             if event.key == K_SPACE:
                 self._game_speed = 1
