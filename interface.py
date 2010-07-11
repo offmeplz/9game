@@ -12,7 +12,7 @@ font = None
 def get_font():
     global font
     if font is None:
-        fontpath = pygame.font.match_font(FONT_FAMILY)
+        fontpath = pygame.font.match_font(FONT_FAMILY, bold=True)
         font = pygame.font.Font(fontpath, FONT_SIZE)
     return font
 
