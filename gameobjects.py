@@ -2,6 +2,7 @@
 #vim:fileencoding=utf-8
 
 import collections
+import math
 import random
 import pygame
 
@@ -250,7 +251,7 @@ class Wall(GameObject, Tower):
     cost = 3
     damage = 0
     radius = 0
-    def __init__(self, g_lefttop):
+    def __init__(self, g_lefttop, world):
         GameObject.__init__(self)
         self.rect.center = util.game2cscreen(g_lefttop)
 
@@ -298,6 +299,48 @@ class SimpleBullet(GameObject):
     def explode(self):
         self.target.hurt(self.damage)
         self.target = None
+
+
+class LaserBeam(pygame.sprite.Sprite):
+    def __init__(self, g_pos, target, damagepersec, g_radius):
+        pygame.sprite.Sprite.__init__(self)
+
+        self.g_pos = Vec(g_pos)
+        self.target = target
+        self.damagepersec = float(damagepersec)
+        self.curdamage = 0
+
+        s_radius = GAME_CELL_SIZE * g_radius
+        rect_size = s_radius * 2 + 1
+        self.rect = pygame.Rect((0,0), (rect_size, rect_size))
+        self.rect.center = util.game2cscreen(g_pos)
+        self.beam_start = Vec(self.rect.center) - Vec(self.rect.topleft)
+        self.image = pygame.surface.Surface((rect_size, rect_size))
+        self.image = self.image.convert_alpha()
+        self.g_radius = g_radius
+
+
+    def update(self, ticks):
+        target = self.target
+        if target is None or not target.alive():
+            self.kill()
+            return
+
+        distance = abs(Vec(target.g_pos) - Vec(self.g_pos))
+        if distance > self.g_radius:
+            self.kill()
+            return
+
+        self.curdamage += self.damagepersec * ticks / TICK_PER_SEC
+        if self.curdamage >= 1:
+            curdamage = int(math.floor(self.curdamage))
+            self.curdamage -= curdamage
+            target.hurt(curdamage)
+
+        # draw
+        beam_end = Vec(util.game2cscreen(target.g_pos)) - Vec(self.rect.topleft)
+        self.image.fill((0,0,0,0))
+        pygame.draw.aaline(self.image, (0,0,255), beam_end, self.beam_start)
         
 
 class SimpleTower(GameObject, Tower):
@@ -312,12 +355,13 @@ class SimpleTower(GameObject, Tower):
     size = 2
     cost = 5
 
-    def __init__(self, g_lefttop, creeps, missles):
+    def __init__(self, g_lefttop, world):
         GameObject.__init__(self)
         self.rect.topleft = util.game2tlscreen(g_lefttop)
         self.g_pos = Vec(util.screen2fgame(self.rect.center))
-        self.creeps = creeps
-        self.missles = missles
+        print self.g_pos, self.rect.center
+        self.creeps = world.creeps
+        self.missles = world.missles
         self.current_recharge = 0
 
     def update(self, ticks):
@@ -351,26 +395,43 @@ class LaserTower(GameObject, Tower):
     bullet_speed = 5
     size = 2
     cost = 5
+    fire_cost = 1
 
-    def __init__(self, g_lefttop, creeps, missles):
+    def __init__(self, g_lefttop, world):
         GameObject.__init__(self)
         self.rect.topleft = util.game2tlscreen(g_lefttop)
         self.g_pos = Vec(util.screen2fgame(self.rect.center))
-        self.creeps = creeps
-        self.missles = missles
+        self.creeps = world.creeps
+        self.missles = world.missles
+        self.messages = world.messages
         self.current_recharge = 0
+        self.world = world
+        self.missle = None
 
     def update(self, ticks):
-        self.current_recharge -= ticks
+        if self.missle is None:
+            self.current_recharge -= ticks
+        elif not self.missle.alive():
+            self.missle = None
+            return
         if self.current_recharge > 0:
+            return
+
+        if self.world.money < self.fire_cost:
             return
 
         creep = self._find_target()
         if creep:
-            missle = SimpleBullet(
-                    self.g_pos, creep, self.damage, self.bullet_speed)
-            self.missles.add(missle)
-            self.current_recharge = self.recharge_ticks
+            self._fire(creep)
+
+    def _fire(self, target):
+        laser = LaserBeam(
+                self.g_pos, target, self.damage, self.radius)
+        self.missles.add(laser)
+        self.world.money -= self.fire_cost
+        msg = '-%d' % self.fire_cost
+        self.messages.add(Message(msg, 1, Vec(self.g_pos), 'black'))
+        self.current_recharge = self.recharge_ticks
     
     def _find_target(self):
         for creep in self.creeps:

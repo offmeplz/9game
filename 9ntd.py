@@ -122,14 +122,7 @@ class World(object):
             raise BuildError, "Can't build here"
 
     def add_tower(self, pos, cls):
-        if cls is Wall:
-            tower = cls(pos)
-        elif cls is SimpleTower:
-            tower = SimpleTower(pos, self.creeps, self.missles)
-        elif cls is LaserTower:
-            tower = LaserTower(pos, self.creeps, self.missles)
-        else:
-            raise ValueError, "Unknown tower type: %s" % repr(cls)
+        tower = cls(pos, self)
 
         if pygame.sprite.spritecollideany(tower, self.creeps):
             raise BuildError, "Can't build on creeps"
