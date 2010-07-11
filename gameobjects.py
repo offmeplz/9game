@@ -26,6 +26,12 @@ class GameObject(pygame.sprite.Sprite):
         return cls.img, cls.img_rect.copy()
 
     @classmethod
+    def load_cached_image(cls, filename):
+        if not hasattr(cls, 'img') or cls.img is None:
+            cls.img, img_rect = util.load_image(cls.resource_name)
+        return cls.img
+
+    @classmethod
     def load_cached_image_list(cls, filename):
         if not hasattr(cls, 'image_list') or cls.image_list is None:
             cls.image_list = util.load_image_array(filename)
@@ -99,7 +105,10 @@ class Creep(GameObject):
     health = 3
     
     def __init__(self, health=None, speed=None, money=1):
-        GameObject.__init__(self)
+        pygame.sprite.Sprite.__init__(self)
+        images = self.load_cached_image_list(self.resource_name)
+        self.image = images[0]
+        self.rect = self.image.get_rect().copy()
         self.direction = Vec(0,1)
         self.money = money
         if health is not None:
@@ -203,7 +212,10 @@ class Creep(GameObject):
                 ( 1, 1): 225,
                 ( 1, 0): 270,
                 ( 1,-1): 315}[tuple(self.direction)]
-        self.image = pygame.transform.rotate(self.img, degrees)
+        if degrees % 90 == 0:
+            self.image = pygame.transform.rotate(self.image_list[0], degrees)
+        else:
+            self.image = pygame.transform.rotate(self.image_list[1], degrees - 45)
         if need_cut:
             bound_rect = self.image.get_bounding_rect()
             self.image = self.image.subsurface(bound_rect)

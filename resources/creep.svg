@@ -43,16 +43,16 @@
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      inkscape:zoom="15.556349"
-     inkscape:cx="15.697401"
-     inkscape:cy="7.6381442"
+     inkscape:cx="25.458802"
+     inkscape:cy="3.4337491"
      inkscape:current-layer="g3675"
      showgrid="true"
      inkscape:document-units="px"
      inkscape:grid-bbox="true"
      inkscape:window-width="1280"
-     inkscape:window-height="950"
-     inkscape:window-x="1280"
-     inkscape:window-y="25"
+     inkscape:window-height="749"
+     inkscape:window-x="-2"
+     inkscape:window-y="0"
      inkscape:window-maximized="1"
      inkscape:showpageshadow="false" />
   <metadata
@@ -77,7 +77,7 @@
        transform="matrix(-0.25000021,0,0,-0.24999989,15.999588,63.999578)">
       <path
          transform="matrix(1.0247453,0,0,1.0247453,-0.23289791,-0.23289547)"
-         d="m 62.181818,31.454546 c 0,16.970204 -13.757068,30.727272 -30.727272,30.727272 -16.970204,0 -30.72727206,-13.757068 -30.72727206,-30.727272 0,-16.970204 13.75706806,-30.72727206 30.72727206,-30.72727206 16.970204,0 30.727272,13.75706806 30.727272,30.72727206 z"
+         d="m 62.181818,31.454546 a 30.727272,30.727272 0 1 1 -61.45454406,0 30.727272,30.727272 0 1 1 61.45454406,0 z"
          sodipodi:ry="30.727272"
          sodipodi:rx="30.727272"
          sodipodi:cy="31.454546"
@@ -85,21 +85,24 @@
          id="path2844"
          style="fill:#c87137;fill-opacity:1;stroke:#000000;stroke-opacity:1"
          sodipodi:type="arc"
-         inkscape:export-xdpi="112.50005"
-         inkscape:export-ydpi="112.50005"
+         inkscape:export-xdpi="112.49997"
+         inkscape:export-ydpi="112.49997"
          inkscape:export-filename="/home/ermolovd/workspace/9game/resources/creep.png" />
       <path
          transform="matrix(1.0731708,0,0,1.0731707,-0.82926757,-9.8065553)"
-         d="m 18.90909,48.272728 c 0,0.753116 -0.61052,1.363636 -1.363636,1.363636 -0.753116,0 -1.363636,-0.61052 -1.363636,-1.363636 0,-0.753116 0.61052,-1.363636 1.363636,-1.363636 0.753116,0 1.363636,0.61052 1.363636,1.363636 z"
+         d="m 18.90909,48.272728 a 1.3636364,1.3636364 0 1 1 -2.727272,0 1.3636364,1.3636364 0 1 1 2.727272,0 z"
          sodipodi:ry="1.3636364"
          sodipodi:rx="1.3636364"
          sodipodi:cy="48.272728"
          sodipodi:cx="17.545454"
          id="path3618"
          style="fill:#241f1c;fill-opacity:1;stroke:#000000;stroke-opacity:1"
-         sodipodi:type="arc" />
+         sodipodi:type="arc"
+         inkscape:export-filename="/home/ermolovd/workspace/9game/resources/creep.png"
+         inkscape:export-xdpi="112.49997"
+         inkscape:export-ydpi="112.49997" />
       <path
-         d="m 18.90909,48.272728 c 0,0.753116 -0.61052,1.363636 -1.363636,1.363636 -0.753116,0 -1.363636,-0.61052 -1.363636,-1.363636 0,-0.753116 0.61052,-1.363636 1.363636,-1.363636 0.753116,0 1.363636,0.61052 1.363636,1.363636 z"
+         d="m 18.90909,48.272728 a 1.3636364,1.3636364 0 1 1 -2.727272,0 1.3636364,1.3636364 0 1 1 2.727272,0 z"
          sodipodi:ry="1.3636364"
          sodipodi:rx="1.3636364"
          sodipodi:cy="48.272728"
@@ -107,7 +110,50 @@
          id="path3618-6"
          style="fill:#241f1c;fill-opacity:1;stroke:#000000;stroke-opacity:1"
          sodipodi:type="arc"
-         transform="matrix(1.0731708,0,0,1.0731707,27.170731,-9.8065553)" />
+         transform="matrix(1.0731708,0,0,1.0731707,27.170731,-9.8065553)"
+         inkscape:export-filename="/home/ermolovd/workspace/9game/resources/creep.png"
+         inkscape:export-xdpi="112.49997"
+         inkscape:export-ydpi="112.49997" />
+      <g
+         id="g3645"
+         inkscape:export-filename="/home/ermolovd/workspace/9game/resources/creep.png"
+         inkscape:export-xdpi="112.49997"
+         inkscape:export-ydpi="112.49997"
+         transform="matrix(0,-1.0000013,0.99999872,0,-64.00161,-0.00168578)">
+        <path
+           transform="matrix(0.72460435,0.72460528,-0.72460342,0.72460435,-32.001677,-13.584228)"
+           d="m 62.181818,31.454546 c 0,16.970204 -13.757068,30.727272 -30.727272,30.727272 -16.970204,0 -30.72727206,-13.757068 -30.72727206,-30.727272 0,-16.970204 13.75706806,-30.72727206 30.72727206,-30.72727206 16.970204,0 30.727272,13.75706806 30.727272,30.72727206 z"
+           sodipodi:ry="30.727272"
+           sodipodi:rx="30.727272"
+           sodipodi:cy="31.454546"
+           sodipodi:cx="31.454546"
+           id="path3639"
+           style="fill:#c87137;fill-opacity:1;stroke:#000000;stroke-opacity:1"
+           sodipodi:type="arc"
+           inkscape:export-xdpi="112.50005"
+           inkscape:export-ydpi="112.50005"
+           inkscape:export-filename="/home/ermolovd/workspace/9game/resources/creep.png" />
+        <path
+           transform="matrix(0.75884635,0.75884732,-0.75884531,0.75884628,-25.653783,-20.775526)"
+           d="m 18.90909,48.272728 c 0,0.753116 -0.61052,1.363636 -1.363636,1.363636 -0.753116,0 -1.363636,-0.61052 -1.363636,-1.363636 0,-0.753116 0.61052,-1.363636 1.363636,-1.363636 0.753116,0 1.363636,0.61052 1.363636,1.363636 z"
+           sodipodi:ry="1.3636364"
+           sodipodi:rx="1.3636364"
+           sodipodi:cy="48.272728"
+           sodipodi:cx="17.545454"
+           id="path3641"
+           style="fill:#241f1c;fill-opacity:1;stroke:#000000;stroke-opacity:1"
+           sodipodi:type="arc" />
+        <path
+           d="m 18.90909,48.272728 c 0,0.753116 -0.61052,1.363636 -1.363636,1.363636 -0.753116,0 -1.363636,-0.61052 -1.363636,-1.363636 0,-0.753116 0.61052,-1.363636 1.363636,-1.363636 0.753116,0 1.363636,0.61052 1.363636,1.363636 z"
+           sodipodi:ry="1.3636364"
+           sodipodi:rx="1.3636364"
+           sodipodi:cy="48.272728"
+           sodipodi:cx="17.545454"
+           id="path3643"
+           style="fill:#241f1c;fill-opacity:1;stroke:#000000;stroke-opacity:1"
+           sodipodi:type="arc"
+           transform="matrix(0.75884635,0.75884732,-0.75884531,0.75884628,-5.854794,-0.9765113)" />
+      </g>
     </g>
   </g>
 </svg>
