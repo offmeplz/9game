@@ -13,6 +13,25 @@ from util import Vec, signum
 
 from cfg import *
 
+def draw_lightning(surface, a, b):
+    color = pygame.Color(0,0,100)
+    a = Vec(a)
+    b = Vec(b)
+    for i in xrange(3):
+        sections = random.randrange(3,7)
+        points = [a]
+        ab = b - a
+        ls = [random.random() for i in xrange(sections)]
+        ls.sort()
+        for l in ls:
+            p = a + ab * l
+            p += ab.perpendicular() * 0.2 * (random.random() - 0.5)
+            points.append((int(p[0]), int(p[1])))
+        points.append(b)
+        pygame.draw.aalines(surface, color, False, points)
+
+
+
 class GameObject(pygame.sprite.Sprite):
     img, img_rect = None, None
 
@@ -20,7 +39,7 @@ class GameObject(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image, self.rect = self.get_img_rect()
 
-    @classmethod
+    @classmethod 
     def get_img_rect(cls):
         if cls.img is None:
             cls.img, cls.img_rect = util.load_image(cls.resource_name)
@@ -309,7 +328,7 @@ class SimpleBullet(GameObject):
         self.target = None
 
 
-class LaserBeam(pygame.sprite.Sprite):
+class Lightning(pygame.sprite.Sprite):
     def __init__(self, g_pos, target, damagepersec, g_radius):
         pygame.sprite.Sprite.__init__(self)
 
@@ -348,7 +367,8 @@ class LaserBeam(pygame.sprite.Sprite):
         # draw
         beam_end = Vec(util.game2cscreen(target.g_pos)) - Vec(self.rect.topleft)
         self.image.fill((0,0,0,0))
-        pygame.draw.aaline(self.image, (0,0,255), beam_end, self.beam_start)
+        draw_lightning(self.image, self.beam_start, beam_end)
+        #pygame.draw.aaline(self.image, (0,0,255), beam_end, self.beam_start)
         
 
 class SimpleTower(GameObject, Tower):
@@ -391,10 +411,10 @@ class SimpleTower(GameObject, Tower):
                 return creep
         return None
 
-class LaserTower(GameObject, Tower):
+class LightningTower(GameObject, Tower):
     resource_name = 'lasertower.png'
 
-    damage = 1
+    damage = 1.5
     radius = 3
     sqradius = radius ** 2
     recharge_time = 2
@@ -432,7 +452,7 @@ class LaserTower(GameObject, Tower):
             self._fire(creep)
 
     def _fire(self, target):
-        laser = LaserBeam(
+        laser = Lightning(
                 self.g_pos, target, self.damage, self.radius)
         self.missles.add(laser)
         self.curmissle = laser

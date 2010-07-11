@@ -59,6 +59,30 @@ class PanelHolder(object):
         for r, subpanel in self.subpanels:
             subpanel.update()
 
+class ActiveElement(object):
+    '''
+    Mixin that checks if element is active.
+    '''
+    def __init__(self, checkactive):
+        self.checkactive = checkactive
+        self.active = False
+
+    def update(self, ticks):
+        active = self.checkactive()
+        if active != self.active:
+            self.active = active
+            self.redraw()
+
+class SelectButton(ActiveElement):
+    def __init__(self, image):
+        self.image = image
+        self.inactive_mask = pygame.surface.Surface(image.get_size())
+
+    def redrawom(self, surface, rect):
+        pass
+        
+
+
 class TowerButton(object):
     def __init__(self, surface, img, pushfunc):
         self.surface = surface
