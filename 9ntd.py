@@ -396,6 +396,7 @@ class Game(object):
         self._restart()
 
     def _restart(self):
+        self.reset_selection()
         reload(testlevel)
         self.world = World(testlevel)
         self._continue_main_loop = True
