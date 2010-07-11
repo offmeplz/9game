@@ -20,6 +20,24 @@ def load_image(name):
         image = image.convert_alpha()
     return image, image.get_rect()
 
+def load_image_array(name):
+    fullpath = os.path.join(RESOURCE_PATH, name)
+    image = pygame.image.load(fullpath)
+    if image.get_alpha() is None:
+        image = image.convert()
+    else:
+        image = image.convert_alpha()
+    width, height = image.get_size()
+    if width % height != 0:
+        raise ValueError, 'Image has invalid dimensions'
+
+    image_list = []
+    rect = Rect((0, 0), (height, height))
+    for i in xrange(width / height):
+        rect.left = i * height
+        image_list.append(image.subsurface(rect))
+    return image_list
+
 def screen2game(screen_pos):
     s_x, s_y = screen_pos
     g_x, g_y = s_x / GAME_CELL_SIZE, s_y / GAME_CELL_SIZE
@@ -47,7 +65,7 @@ def game2screencellrect(g_rect):
     s_rect.top *= GAME_CELL_SIZE
     s_rect.left *= GAME_CELL_SIZE
     s_rect.width *= GAME_CELL_SIZE
-    s_rect.heght *= GAME_CELL_SIZE
+    s_rect.height *= GAME_CELL_SIZE
     return s_rect
 
 def screen2gamecellrect(s_rect):
@@ -61,7 +79,7 @@ def screen2gamecellrect(s_rect):
     g_rect.top /= GAME_CELL_SIZE
     g_rect.left /= GAME_CELL_SIZE
     g_rect.width /= GAME_CELL_SIZE
-    g_rect.heght /= GAME_CELL_SIZE
+    g_rect.height /= GAME_CELL_SIZE
     return g_rect
 
 def signum(num):

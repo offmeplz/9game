@@ -25,13 +25,23 @@ class GameObject(pygame.sprite.Sprite):
             cls.img, cls.img_rect = util.load_image(cls.resource_name)
         return cls.img, cls.img_rect.copy()
 
+    @classmethod
+    def load_cached_image_list(cls, filename):
+        if not hasattr(cls, 'image_list') or cls.image_list is None:
+            cls.image_list = util.load_image_array(filename)
+        return cls.image_list
+
     def update(self, ticks):
         pass
 
 class Blood(GameObject):
     resource_name = 'blood.png'
+
     def __init__(self, obj):
-        GameObject.__init__(self)
+        pygame.sprite.Sprite.__init__(self)
+        images = self.load_cached_image_list(self.resource_name)
+        self.image = random.choice(images)
+        self.rect = self.image.get_rect().copy()
         self.rect.center = obj.rect.center
         angle = random.choice([0, 90, 180, 270])
         self.image = pygame.transform.rotate(self.image, angle)
