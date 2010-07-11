@@ -14,7 +14,7 @@
    id="svg2816"
    version="1.1"
    inkscape:version="0.47 r22583"
-   sodipodi:docname="New document 2">
+   sodipodi:docname="lasertower.svg">
   <defs
      id="defs2818">
     <inkscape:perspective
@@ -65,7 +65,10 @@
        width="398.61514"
        height="398.61511"
        x="0.69243693"
-       y="653.05463" />
+       y="653.05463"
+       inkscape:export-filename="/home/ermolovd/workspace/9game/resources/lasertower.png"
+       inkscape:export-xdpi="10.8"
+       inkscape:export-ydpi="10.8" />
     <rect
        style="fill:#000000;stroke:#000000;stroke-width:2.07997488999999991;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none;fill-opacity:1"
        id="rect3602"
@@ -73,6 +76,9 @@
        height="167.79785"
        x="-419.87076"
        y="609.0968"
-       transform="matrix(0.56018661,-0.82836644,0.56018661,0.82836644,0,0)" />
+       transform="matrix(0.56018661,-0.82836644,0.56018661,0.82836644,0,0)"
+       inkscape:export-filename="/home/ermolovd/workspace/9game/resources/lasertower.png"
+       inkscape:export-xdpi="10.8"
+       inkscape:export-ydpi="10.8" />
   </g>
 </svg>
