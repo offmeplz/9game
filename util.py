@@ -170,9 +170,9 @@ def is_walkable(begin, end, radius, sprites):
 def placeintsegment(approxcenter, size):
     size = int(size)
     if size % 2 == 0:
-        return int(round(approxcenter)) - size / 2
+        return int(math.ceil(approxcenter)) - size / 2
     else:
-        return int(approxcenter) - size / 2
+        return int(round(approxcenter)) - size / 2
 
 def placeintrect(approxcenter, sizes):
     xcorner = placeintsegment(approxcenter[0], sizes[0])
