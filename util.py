@@ -44,8 +44,9 @@ def screen2game(screen_pos):
     return g_x, g_y
 
 def screen2fgame(screen_pos):
+    cell = float(GAME_CELL_SIZE)
     s_x, s_y = screen_pos
-    g_x, g_y = s_x / float(GAME_CELL_SIZE), s_y / float(GAME_CELL_SIZE)
+    g_x, g_y = float(s_x - cell / 2) / cell, float(s_y - cell / 2) / cell
     return g_x, g_y
 
 def game2screen(game_pos):
