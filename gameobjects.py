@@ -339,3 +339,44 @@ class SimpleTower(GameObject, Tower):
             if sqdist <= self.sqradius:
                 return creep
         return None
+
+class LaserTower(GameObject, Tower):
+    resource_name = 'lasertower.png'
+
+    damage = 1
+    radius = 3
+    sqradius = radius ** 2
+    recharge_time = 2
+    recharge_ticks = recharge_time * TICK_PER_SEC
+    bullet_speed = 5
+    size = 2
+    cost = 5
+
+    def __init__(self, g_lefttop, creeps, missles):
+        GameObject.__init__(self)
+        self.rect.topleft = util.game2tlscreen(g_lefttop)
+        self.g_pos = Vec(util.screen2fgame(self.rect.center))
+        self.creeps = creeps
+        self.missles = missles
+        self.current_recharge = 0
+
+    def update(self, ticks):
+        self.current_recharge -= ticks
+        if self.current_recharge > 0:
+            return
+
+        creep = self._find_target()
+        if creep:
+            missle = SimpleBullet(
+                    self.g_pos, creep, self.damage, self.bullet_speed)
+            self.missles.add(missle)
+            self.current_recharge = self.recharge_ticks
+    
+    def _find_target(self):
+        for creep in self.creeps:
+            distvec = creep.g_pos - self.g_pos
+            sqdist = distvec[0] ** 2 + distvec[1] ** 2
+            if sqdist <= self.sqradius:
+                return creep
+        return None
+

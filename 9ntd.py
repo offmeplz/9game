@@ -16,7 +16,7 @@ import field
 import interface
 import util
 from cfg import *
-from gameobjects import Creep, Wall, SimpleBullet, SimpleTower, Starter, Tower, Blood, Message
+from gameobjects import Creep, Wall, SimpleBullet, SimpleTower, Starter, Tower, Blood, Message, LaserTower
 from util import Vec
 
 import testlevel
@@ -126,6 +126,8 @@ class World(object):
             tower = cls(pos)
         elif cls is SimpleTower:
             tower = SimpleTower(pos, self.creeps, self.missles)
+        elif cls is LaserTower:
+            tower = LaserTower(pos, self.creeps, self.missles)
         else:
             raise ValueError, "Unknown tower type: %s" % repr(cls)
 
