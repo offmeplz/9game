@@ -59,7 +59,11 @@ class Message(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.lifeticks = lifetime * TICK_PER_SEC
         font = interface.get_font()
-        self.image = font.render(text, True, pygame.Color(color))
+        if isinstance(color, tuple):
+            color = pygame.Color(*color)
+        else:
+            color = pygame.Color(color)
+        self.image = font.render(text, True, color)
         self.g_pos = g_pos
         self.rect = self.image.get_rect()
         self.rect.center = util.game2cscreen(g_pos)
@@ -359,7 +363,6 @@ class SimpleTower(GameObject, Tower):
         GameObject.__init__(self)
         self.rect.topleft = util.game2tlscreen(g_lefttop)
         self.g_pos = Vec(util.screen2fgame(self.rect.center))
-        print self.g_pos, self.rect.center
         self.creeps = world.creeps
         self.missles = world.missles
         self.current_recharge = 0
@@ -406,13 +409,13 @@ class LaserTower(GameObject, Tower):
         self.messages = world.messages
         self.current_recharge = 0
         self.world = world
-        self.missle = None
+        self.curmissle = None
 
     def update(self, ticks):
-        if self.missle is None:
+        if self.curmissle is None:
             self.current_recharge -= ticks
-        elif not self.missle.alive():
-            self.missle = None
+        elif not self.curmissle.alive():
+            self.curmissle = None
             return
         if self.current_recharge > 0:
             return
@@ -428,9 +431,10 @@ class LaserTower(GameObject, Tower):
         laser = LaserBeam(
                 self.g_pos, target, self.damage, self.radius)
         self.missles.add(laser)
+        self.curmissle = laser
         self.world.money -= self.fire_cost
         msg = '-%d' % self.fire_cost
-        self.messages.add(Message(msg, 1, Vec(self.g_pos), 'black'))
+        self.messages.add(Message(msg, 1, Vec(self.g_pos), GOLD_COLOR))
         self.current_recharge = self.recharge_ticks
     
     def _find_target(self):

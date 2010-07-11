@@ -103,7 +103,7 @@ class World(object):
         money = int(self.sell_factor * tower.cost)
         message = '+%d' % money
         self.money += money
-        self.messages.add(Message(message, 1, tower.g_pos, 'black'))
+        self.messages.add(Message(message, 1, tower.g_pos, GOLD_COLOR))
 
         tower.kill()
 
@@ -176,7 +176,7 @@ class World(object):
         self.money += creep.money
         self.corpse.add(Blood(creep))
         message = '+%d' % creep.money
-        self.messages.add(Message(message, 1, creep.g_pos, 'black'))
+        self.messages.add(Message(message, 1, creep.g_pos, GOLD_COLOR))
 
 class Field(object):
     def __init__(self, size_x, size_y, enters, exits):

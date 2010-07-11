@@ -24,3 +24,5 @@ FONT_SIZE = 12
 FONT_FAMILY = 'arial'
 
 BLOOD = True
+
+GOLD_COLOR = (160,110,0)
