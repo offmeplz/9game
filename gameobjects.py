@@ -95,6 +95,9 @@ class Starter(object):
         self.func = func
         self.curtime = 0
 
+    def alive(self):
+        return self.nexttime is not None
+
     def update(self, ticks):
         self.curtime += float(ticks) / TICK_PER_SEC
         while self.nexttime is not None and self.curtime > self.nexttime:
@@ -258,6 +261,7 @@ class Wall(GameObject, Tower):
     def __init__(self, g_lefttop, world):
         GameObject.__init__(self)
         self.rect.center = util.game2cscreen(g_lefttop)
+        self.g_pos = Vec(util.screen2fgame(self.rect.center))
 
 class SimpleBullet(GameObject):
     radius = 2

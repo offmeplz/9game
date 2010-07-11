@@ -26,3 +26,4 @@ FONT_FAMILY = 'arial'
 BLOOD = True
 
 GOLD_COLOR = (160,110,0)
+LIFE_COLOR = (200, 0, 0)

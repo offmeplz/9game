@@ -16,7 +16,7 @@ import field
 import interface
 import util
 from cfg import *
-from gameobjects import Creep, Wall, SimpleBullet, SimpleTower, Starter, Tower, Blood, Message, LaserTower
+from gameobjects import Creep, SimpleBullet, Starter, Tower, Blood, Message, Wall, SimpleTower
 from util import Vec
 
 import testlevel
@@ -78,12 +78,27 @@ class World(object):
         self.ticks_elapsed = 0
         self.sell_factor = level.SELL_FACTOR
 
+        self.curwaves = set()
         self.creepwave = Starter(
-                level.CREEP_WAVES[0]['creeps'],
-                self.spawn_creep)
+                level.CREEP_WAVES,
+                self.start_wave)
 
         self.money = level.INIT_MONEY
         self.lives = level.LIVES
+
+    def start_wave(self, wavedict):
+        wave = Starter(wavedict['creeps'], self.spawn_creep)
+        self.curwaves.add(wave)
+
+    def updatewaves(self, ticks):
+        fordelete = []
+        for wave in self.curwaves:
+            if not wave.alive():
+                fordelete.append(wave)
+            else:
+                wave.update(ticks)
+        for wave in fordelete:
+            self.curwaves.remove(wave)
 
     def add_creep(self, creep):
         creep.add([self.creeps])
@@ -152,6 +167,7 @@ class World(object):
     def update(self, ticks):
         self.ticks_elapsed += ticks
         self.creepwave.update(ticks)
+        self.updatewaves(ticks)
 
         self.towers.update(ticks)
         self.creeps.update(ticks)
@@ -171,6 +187,7 @@ class World(object):
 
     def oncreepexit(self, creep):
         self.lives -= 1
+        self.messages.add(Message('-1', 1, creep.g_pos, LIFE_COLOR))
 
     def oncreepdeath(self, creep):
         self.money += creep.money
@@ -538,7 +555,7 @@ class Game(object):
             if event.key == K_w:
                 self.select_tower_for_build(Wall)
             elif event.key == K_s:
-                self.select_tower_for_bjuild(SimpleTower)
+                self.select_tower_for_build(SimpleTower)
             elif event.key == K_SPACE:
                 self._game_speed = 4
             elif event.key == K_RETURN:

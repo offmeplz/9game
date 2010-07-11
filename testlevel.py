@@ -29,7 +29,8 @@ BACKGROUND = None
 
 # Waves of creeps.
 CREEP_WAVES = [
-        dict(creeps=((i * 2, Creep(health=5, speed=2)) for i in count())),
+        (0, dict(creeps=((i * 2, Creep(health=5, speed=2)) for i in count()))),
+        (10, dict(creeps=((i, Creep(health=10, speed=1.5, money=2)) for i in count()))),
         ]
 
 # Availible towers.
