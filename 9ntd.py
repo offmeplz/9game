@@ -570,6 +570,12 @@ class Game(object):
                     self._game_speed = 4
                 else:
                     self.world.release_creeps()
+            elif event.key == K_z:
+                self._game_speed = 8
+            elif event.key == K_x:
+                self._game_speed = 16
+            elif event.key == K_c:
+                self._game_speed = 32
             elif event.key == K_RETURN:
                 self.toggle_pause()
             elif event.key == K_F10:
@@ -581,7 +587,7 @@ class Game(object):
                     self.update_static_layer()
 
         elif event.type == KEYUP:
-            if event.key == K_SPACE:
+            if event.key in (K_SPACE, K_z, K_x, K_c):
                 self._game_speed = 1
         elif event.type == MOUSEBUTTONDOWN:
             if self._field_rect.collidepoint(event.pos):
