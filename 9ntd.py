@@ -81,7 +81,7 @@ class World(object):
         self.curwaves = set()
         self.creepwave = Starter(
                 level.CREEP_WAVES,
-                self.start_wave)
+                self.start_wave, start=False)
 
         self.money = level.INIT_MONEY
         self.lives = level.LIVES
@@ -89,6 +89,12 @@ class World(object):
     def start_wave(self, wavedict):
         wave = Starter(wavedict['creeps'], self.spawn_creep)
         self.curwaves.add(wave)
+
+    def release_creeps(self):
+        self.creepwave.start()
+
+    def creeps_released(self):
+        return self.creepwave.started
 
     def updatewaves(self, ticks):
         fordelete = []
@@ -557,7 +563,10 @@ class Game(object):
             elif event.key == K_s:
                 self.select_tower_for_build(SimpleTower)
             elif event.key == K_SPACE:
-                self._game_speed = 4
+                if self.world.creeps_released():
+                    self._game_speed = 4
+                else:
+                    self.world.release_creeps()
             elif event.key == K_RETURN:
                 self.toggle_pause()
             elif event.key == K_F10:

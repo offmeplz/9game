@@ -102,29 +102,38 @@ class Starter(object):
     def defaultcallback(arg):
         raise NotImplementedError, "Callback is not set."
 
-    def __init__(self, iargs, func):
+    def __init__(self, iargs, func, start=True):
         self.iargs = iter(iargs)
-        try:
-            self.nexttime, self.arg = next(self.iargs)
-        except StopIteration:
-            self.nexttime, self.arg = None, None
+        self.started = start
+        if self.started:
+            self.next()
 
         if func is None:
             func = Starter.defaultcallback
         self.func = func
         self.curtime = 0
 
+    def next(self):
+        try:
+            self.nexttime, self.arg = next(self.iargs)
+        except StopIteration:
+            self.nexttime, self.arg = None, None
+
+    def start(self):
+        if not self.started:
+            self.started = True
+            self.next()
+
     def alive(self):
-        return self.nexttime is not None
+        return self.started and self.nexttime is not None
 
     def update(self, ticks):
+        if not self.started:
+            return
         self.curtime += float(ticks) / TICK_PER_SEC
         while self.nexttime is not None and self.curtime > self.nexttime:
             self.func(self.arg)
-            try:
-                self.nexttime, self.arg = next(self.iargs)
-            except StopIteration:
-                self.nexttime, self.arg = None, None
+            self.next()
 
 class Creep(GameObject):
     resource_name = 'creep.png'
