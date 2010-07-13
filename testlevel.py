@@ -4,6 +4,8 @@
 from itertools import count
 from gameobjects import Creep, Wall, SimpleTower, LightningTower
 
+from exampletower import ExampleTower
+
 # Set map (Unsupported for now)
 # > -- enter
 # ^ -- exit
@@ -58,6 +60,7 @@ TOWERS = [
         Wall,
         SimpleTower,
         LightningTower,
+        ExampleTower,
         ]
 
 INIT_MONEY = 50
