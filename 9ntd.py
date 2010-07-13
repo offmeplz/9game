@@ -85,10 +85,12 @@ class World(object):
 
         self.money = level.INIT_MONEY
         self.lives = level.LIVES
+        self.wave_index = 0
 
     def start_wave(self, wavedict):
         wave = Starter(wavedict['creeps'], self.spawn_creep)
         self.curwaves.add(wave)
+        self.wave_index += 1
 
     def release_creeps(self):
         self.creepwave.start()
@@ -377,7 +379,8 @@ class Game(object):
                 return ''
             else:
                 secs = self.world.ticks_elapsed / TICK_PER_SEC
-                return '%02d:%02d' % (secs / 60, secs % 60)
+                wave = self.world.wave_index
+                return '%02d:%02d - %d wave' % (secs / 60, secs % 60, wave)
         time_rect = Rect((top_panel_x_size / 6, 0), (top_panel_x_size / 6, top_panel_y_size))
         time_info = interface.TextInfo(
                 self._top_panel.surface, time_rect, get_time_text)
