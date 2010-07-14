@@ -14,7 +14,6 @@ class ExampleTower(GameObject, Tower):
     bullet_speed = 5
 
     # do not change
-    recharge_ticks = recharge_time * TICK_PER_SEC
     size = 2
     sqradius = radius ** 2
 
@@ -25,6 +24,7 @@ class ExampleTower(GameObject, Tower):
         self.creeps = world.creeps
         self.missles = world.missles
         self.current_recharge = 0
+        self.recharge_ticks = self.recharge_time * TICK_PER_SEC
 
     def update(self, ticks):
         self.current_recharge -= ticks

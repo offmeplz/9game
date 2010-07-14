@@ -387,7 +387,6 @@ class SimpleTower(GameObject, Tower):
     radius = 3
     sqradius = radius ** 2
     recharge_time = 2
-    recharge_ticks = recharge_time * TICK_PER_SEC
     bullet_speed = 5
     size = 2
     cost = 5
@@ -399,6 +398,7 @@ class SimpleTower(GameObject, Tower):
         self.creeps = world.creeps
         self.missles = world.missles
         self.current_recharge = 0
+        self.recharge_ticks = self.recharge_time * TICK_PER_SEC
 
     def update(self, ticks):
         self.current_recharge -= ticks
@@ -427,7 +427,6 @@ class LightningTower(GameObject, Tower):
     radius = 3
     sqradius = radius ** 2
     recharge_time = 2
-    recharge_ticks = recharge_time * TICK_PER_SEC
     bullet_speed = 5
     size = 2
     cost = 5
@@ -443,6 +442,7 @@ class LightningTower(GameObject, Tower):
         self.current_recharge = 0
         self.world = world
         self.curmissle = None
+        self.recharge_ticks = self.recharge_time * TICK_PER_SEC
 
     def update(self, ticks):
         if self.curmissle is None:
