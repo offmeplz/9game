@@ -8,14 +8,13 @@ class ExampleTower(GameObject, Tower):
 
     # can be changed
     damage = 5
-    radius = 5
+    radius = 15
     cost = 5
     recharge_time = 2
     bullet_speed = 5
 
     # do not change
     size = 2
-    sqradius = radius ** 2
 
     def __init__(self, g_lefttop, world):
         GameObject.__init__(self)
@@ -41,7 +40,6 @@ class ExampleTower(GameObject, Tower):
     def _find_target(self):
         for creep in self.creeps:
             distvec = creep.g_pos - self.g_pos
-            sqdist = distvec[0] ** 2 + distvec[1] ** 2
-            if sqdist <= self.sqradius:
+            if abs(distvec) <= self.radius:
                 return creep
         return None
