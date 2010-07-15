@@ -31,7 +31,6 @@ def draw_lightning(surface, a, b):
         pygame.draw.aalines(surface, color, False, points)
 
 
-
 class GameObject(pygame.sprite.Sprite):
     img, img_rect = None, None
 
@@ -139,18 +138,20 @@ class Creep(GameObject):
     resource_name = 'creep.png'
     speed = 2.
     health = 3
+    money = 1
     
-    def __init__(self, health=None, speed=None, money=1):
+    def __init__(self, health=None, speed=None, money=None):
         pygame.sprite.Sprite.__init__(self)
         images = self.load_cached_image_list(self.resource_name)
         self.image = images[0]
         self.rect = self.image.get_rect().copy()
         self.direction = Vec(0,1)
-        self.money = money
+        if money is not None:
+            self.money = money
         if health is not None:
             self.health = health
-        else:
-            self.health = Creep.health
+        if speed is not None:
+            self.speed = speed
 
         self.maxhealth = health
 
@@ -377,7 +378,6 @@ class Lightning(pygame.sprite.Sprite):
         beam_end = Vec(util.game2cscreen(target.g_pos)) - Vec(self.rect.topleft)
         self.image.fill((0,0,0,0))
         draw_lightning(self.image, self.beam_start, beam_end)
-        #pygame.draw.aaline(self.image, (0,0,255), beam_end, self.beam_start)
         
 
 class SimpleTower(GameObject, Tower):
@@ -385,8 +385,7 @@ class SimpleTower(GameObject, Tower):
 
     damage = 1
     radius = 3
-    sqradius = radius ** 2
-    recharge_time = 2
+    recharge_time = 0.2
     bullet_speed = 5
     size = 2
     cost = 5
@@ -415,8 +414,7 @@ class SimpleTower(GameObject, Tower):
     def _find_target(self):
         for creep in self.creeps:
             distvec = creep.g_pos - self.g_pos
-            sqdist = distvec[0] ** 2 + distvec[1] ** 2
-            if sqdist <= self.sqradius:
+            if abs(distvec) <= self.radius:
                 return creep
         return None
 
@@ -425,7 +423,6 @@ class LightningTower(GameObject, Tower):
 
     damage = 1.5
     radius = 3
-    sqradius = radius ** 2
     recharge_time = 2
     bullet_speed = 5
     size = 2
@@ -473,8 +470,7 @@ class LightningTower(GameObject, Tower):
     def _find_target(self):
         for creep in self.creeps:
             distvec = creep.g_pos - self.g_pos
-            sqdist = distvec[0] ** 2 + distvec[1] ** 2
-            if sqdist <= self.sqradius:
+            if abs(distvec) <= self.radius:
                 return creep
         return None
 
