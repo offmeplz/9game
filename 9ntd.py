@@ -420,7 +420,7 @@ class Game(object):
         self.reset_selection()
         reload(testlevel)
         self.world = World(testlevel)
-        self._continue_main_loop = True
+        self._continue_loop = True
         self._clock = pygame.time.Clock()
         self._state = 'PLAY'
         self.background = pygame.Surface(self._field_surface.get_size()).convert()
@@ -457,7 +457,8 @@ class Game(object):
                 if self._selection_rect is not None:
                     self._field_surface.blit(self.static, self._selection_rect.topleft, self._selection_rect)
 
-                self.world.update(self._game_speed)
+                for i in xrange(self._game_speed):
+                    self.world.update(self._game_speed)
 
                 if BLOOD:
                     self.world.corpse.draw(self.background)
